@@ -1,0 +1,187 @@
+🌱 Plantheory — Product & Execution Blueprint
+1. Vision & Core Idea
+Plantheory is a simple, modern platform that helps businesses document, organize, and run their daily operations from one place — without changing how they already work.
+Mission: Turn operational chaos into clarity.
+What we are NOT:
+•	Not a CRM
+•	Not project management software
+•	Not a compliance or legal system
+What we ARE:
+•	The single source of truth for how a business operates day to day
+________________________________________
+2. The Problem We Solve
+Most small and mid-sized businesses struggle with:
+•	Repeating the same instructions to employees
+•	Knowledge locked in managers’ heads
+•	SOPs scattered across WhatsApp, Google Docs, PDFs
+•	Employees unsure which tools or vendors to use
+•	Forgotten vendor renewals and ownership confusion
+These problems cause:
+•	Lost time
+•	Mistakes
+•	Poor onboarding
+•	Revenue leakage
+Businesses want clarity — not another complex system.
+________________________________________
+3. Target Customers (Initial)
+Primary (Phase 1):
+•	Small businesses (5–50 employees)
+•	High operational repetition
+Best starting niches:
+•	Restaurants
+•	Clinics
+•	Agencies
+•	Early-stage startups
+________________________________________
+4. Core Product Concept
+Plantheory is built around Operational Playbooks.
+Each playbook represents how a real process works inside the business.
+Examples:
+•	Opening the store
+•	Onboarding a new employee
+•	Handling refunds
+•	Running payroll
+Every playbook can include:
+•	Step-by-step instructions
+•	Tools used
+•	Vendors involved
+•	Owner/responsible person
+________________________________________
+5. Product Structure (Mental Model)
+Instead of separate modules, Plantheory uses Operational Blocks.
+Each block may contain:
+•	Instructions (SOPs)
+•	Tool references
+•	Vendor references
+•	Ownership
+This keeps the product intuitive and non-overwhelming.
+________________________________________
+6. PHASE 1 — MVP (Validation Phase)
+Goal
+Validate real demand and daily usage with minimal features.
+MVP Features
+6.1 Operating Playbooks (CORE)
+•	Create workspace
+•	Create/edit pages
+•	Rich text + images
+•	Step-based formatting
+•	Page owner
+•	Last updated timestamp
+•	Mobile-first UI
+•	Global search
+6.2 Tool Linking (Lightweight)
+•	Add tool name + URL inside playbooks
+•	Optional tool owner
+•	No full directory yet
+6.3 Sharing & Access
+•	Shareable workspace link
+•	View-only access
+•	Optional PIN-based access
+6.4 Templates
+•	5–10 ready-made templates for one niche
+•	Templates auto-loaded on signup
+Out of Scope (Important)
+•	No advanced roles
+•	No analytics
+•	No vendor reminders
+•	No AI
+________________________________________
+7. PHASE 1 — Go-To-Market Strategy
+Target
+100 active companies
+Acquisition Methods
+•	Founder-led cold outreach
+•	Local business outreach (restaurants/clinics)
+•	LinkedIn + community posts
+•	Free setup + templates
+Success Metrics
+•	100 workspaces created
+•	30% weekly active users
+•	Qualitative feedback validating value
+________________________________________
+8. PHASE 2 — Expansion (Product-Market Fit)
+Goal
+Turn Plantheory into a daily operational hub.
+New Features
+8.1 Internal Tools Directory
+•	Central list of tools
+•	Tool categories
+•	Tool owner
+•	Linked SOPs
+8.2 Vendor & Service Tracker
+•	Vendor name & type
+•	Contact info
+•	Renewal date
+•	Email reminders
+8.3 Access Roles
+•	Admin
+•	Editor
+•	Viewer
+8.4 Industry Templates
+•	More niche-specific SOP packs
+Monetization Begins
+•	Page limits
+•	Multi-location support
+•	Vendor reminders
+________________________________________
+9. PHASE 2 — Growth Strategy
+•	SEO landing pages (templates & SOP content)
+•	Partnerships with consultants & agencies
+•	Referral incentives
+•	Case studies
+Success Metrics
+•	500+ active companies
+•	5% paid conversion
+•	Multi-feature adoption
+________________________________________
+10. PHASE 3 — Platform Scale
+Goal
+Become operational infrastructure for growing businesses.
+Advanced Features
+10.1 Multi-Location Support
+•	Global playbooks
+•	Local overrides
+10.2 AI Assistance
+•	SOP draft suggestions
+•	Missing-step detection
+•	Content freshness alerts
+10.3 Compliance Readiness (Optional)
+•	Ownership tracking
+•	Review history
+•	Audit logs
+10.4 Analytics
+•	SOP usage
+•	Bottlenecks
+•	Training gaps
+________________________________________
+11. Monetization Model
+•	Free tier (limited pages)
+•	Team plan ($19/month)
+•	Business plan ($49/month)
+•	Enterprise (custom pricing)
+Pricing scales by:
+•	Number of locations
+•	Advanced features
+________________________________________
+12. Long-Term Vision
+Plantheory evolves into:
+•	Industry-standard operating playbooks
+•	Marketplace for templates
+•	Due diligence & acquisition readiness tool
+•	Operations intelligence platform
+________________________________________
+13. Guiding Principles
+•	Simple over powerful
+•	Clarity over complexity
+•	Adoption over features
+•	One core problem at a time
+________________________________________
+14. Current Status
+Next Immediate Steps:
+1.	Finalize first niche
+2.	Build Phase 1 MVP
+3.	Acquire first 10 pilot users
+4.	Iterate based on feedback
+________________________________________
+Plantheory — How your business actually works.
+
