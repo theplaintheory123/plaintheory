@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import DashboardLayout from '@/components/ui/DashboardLayout'
 import { getUserWorkspace, getWorkspaceMembers, getProfile } from '@/lib/supabase/queries'
 import { SettingsClient } from './SettingsClient'
+import { Settings } from 'lucide-react'
 
 type Props = {
   searchParams: Promise<{ tab?: string }>
@@ -35,11 +36,16 @@ export default async function SettingsPage({ searchParams }: Props) {
   return (
     <DashboardLayout user={user}>
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Settings</h1>
-        <p className="mt-1 text-slate-600">
-          Manage your workspace and account settings
-        </p>
+      <div className="mb-6">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100">
+            <Settings className="h-5 w-5 text-slate-600" />
+          </div>
+          <div>
+            <h1 className="text-xl font-semibold text-slate-900">Settings</h1>
+            <p className="text-sm text-slate-500">Manage your workspace and account</p>
+          </div>
+        </div>
       </div>
 
       <SettingsClient

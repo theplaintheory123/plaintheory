@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Share2, X, Copy, Check, Link2, Info } from 'lucide-react'
 
 type Props = {
   playbookId: string
@@ -29,48 +30,79 @@ export function ShareButton({ playbookId, workspaceId }: Props) {
     <>
       <button
         onClick={() => setShowModal(true)}
-        className="rounded-xl border-2 border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+        className="group inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition-all hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
       >
+        <Share2 className="h-4 w-4 text-slate-400 transition-colors group-hover:text-indigo-500" />
         Share
       </button>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-900">Share Playbook</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 text-white">
+                  <Share2 className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900">Share Playbook</h3>
+                  <p className="text-xs text-slate-500">Share read-only access</p>
+                </div>
+              </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
               >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <p className="mb-4 text-sm text-slate-600">
-              Share this link with anyone to give them read-only access to this playbook.
-            </p>
+            {/* Content */}
+            <div className="p-6">
+              <p className="mb-4 text-sm text-slate-600">
+                Share this link with anyone to give them read-only access to this playbook.
+              </p>
 
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={shareUrl}
-                readOnly
-                className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
-              />
-              <button
-                onClick={handleCopy}
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-              >
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
+              <div className="mb-4 flex gap-2">
+                <div className="relative flex-1">
+                  <Link2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    value={shareUrl}
+                    readOnly
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10"
+                  />
+                </div>
+                <button
+                  onClick={handleCopy}
+                  className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all ${
+                    copied
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/25 hover:shadow-xl'
+                  }`}
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4" />
+                      Copy
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-amber-700 ring-1 ring-amber-200/50">
+                <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <p className="text-xs">
+                  You need to enable workspace sharing in Settings for this link to work.
+                </p>
+              </div>
             </div>
-
-            <p className="mt-4 text-xs text-slate-500">
-              Note: You need to enable workspace sharing in Settings for this link to work.
-            </p>
           </div>
         </div>
       )}

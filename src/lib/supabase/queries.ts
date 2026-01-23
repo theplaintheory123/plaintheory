@@ -212,6 +212,11 @@ export async function getPlaybook(playbookId: string): Promise<Playbook | null> 
 export async function getRecentPlaybooks(workspaceId: string, limit = 5): Promise<Playbook[]> {
   const supabase = await createClient()
 
+  if (!workspaceId) {
+    console.error('Error fetching recent playbooks: workspaceId is required')
+    return []
+  }
+
   const { data, error } = await supabase
     .from('playbooks')
     .select(`
@@ -223,7 +228,7 @@ export async function getRecentPlaybooks(workspaceId: string, limit = 5): Promis
     .limit(limit)
 
   if (error) {
-    console.error('Error fetching recent playbooks:', error)
+    console.error('Error fetching recent playbooks:', error.message || error.code || 'Unknown error')
     return []
   }
   return data || []
