@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { signup } from '../actions'
 import Link from 'next/link'
+import Image from 'next/image'
 
 function SubmitButton() {
   const { pending } = useFormStatus()
@@ -51,10 +52,7 @@ export default function SignupPage() {
           {/* Logo */}
           <div className="mb-8 flex justify-center">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-blue-700 shadow-lg">
-                <span className="text-2xl font-bold text-white">P</span>
-              </div>
-              <span className="text-2xl font-bold text-slate-900">Plantheory</span>
+              <Image src="/logo-text.svg" width={140} height={140} alt='plaintheory'/>
             </div>
           </div>
 

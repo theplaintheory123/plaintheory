@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signout } from '@/app/auth/actions'
+import Image from 'next/image'
 
 type User = {
   email?: string
@@ -75,10 +76,7 @@ export default function DashboardLayout({ children, user }: DashboardLayoutProps
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="flex h-16 items-center gap-3 border-b border-slate-200 px-6">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-blue-700 shadow-lg">
-              <span className="text-xl font-bold text-white">P</span>
-            </div>
-            <span className="text-xl font-bold text-slate-900">Plantheory</span>
+            <Image src="logo-text.svg" width={140} height={140} alt='plaintheory'/>
           </div>
 
           {/* Navigation */}
@@ -130,10 +128,7 @@ export default function DashboardLayout({ children, user }: DashboardLayoutProps
       {/* Mobile header */}
       <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-slate-200 bg-white px-4 lg:hidden">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-blue-700 shadow-lg">
-            <span className="text-xl font-bold text-white">P</span>
-          </div>
-          <span className="text-xl font-bold text-slate-900">Plantheory</span>
+          <Image src="logo-text.svg" width={140} height={140} alt='plaintheory'/>
         </div>
       </header>
 

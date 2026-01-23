@@ -66,7 +66,7 @@ export async function signup(prevState: ActionState | null, formData: FormData):
   } else {
     // User needs to confirm email
     revalidatePath('/', 'layout')
-    redirect('/auth/confirm')
+    redirect(`/auth/verify-email?email=${encodeURIComponent(data.email)}`)
   }
 }
 

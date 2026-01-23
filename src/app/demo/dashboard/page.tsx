@@ -2,8 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import DashboardLayout from '@/components/ui/DashboardLayout'
 import Link from 'next/link'
-import { getUserWorkspace, getRecentPlaybooks, getDashboardStats } from '@/lib/supabase/queries'
-import { formatDistanceToNow } from '@/lib/utils/date'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -16,24 +14,17 @@ export default async function DashboardPage() {
     redirect('/auth/login')
   }
 
-  // Get user's workspace
-  const workspace = await getUserWorkspace(user.id)
+  // Mock data for the dashboard
+  const recentPlaybooks = [
+    { id: '1', title: 'Employee Onboarding Process', updatedAt: '2 hours ago', category: 'HR' },
+    { id: '2', title: 'Customer Support Workflow', updatedAt: '1 day ago', category: 'Support' },
+    { id: '3', title: 'Store Opening Checklist', updatedAt: '3 days ago', category: 'Operations' },
+  ]
 
-  // Redirect to onboarding if no workspace
-  if (!workspace) {
-    redirect('/onboarding')
-  }
-
-  // Fetch dashboard data
-  const [recentPlaybooks, stats] = await Promise.all([
-    getRecentPlaybooks(workspace.id, 5),
-    getDashboardStats(workspace.id),
-  ])
-
-  const statsDisplay = [
-    { label: 'Total Playbooks', value: stats.totalPlaybooks.toString(), icon: BookIcon },
-    { label: 'Team Members', value: stats.totalMembers.toString(), icon: UsersIcon },
-    { label: 'Total Views', value: stats.totalViews.toString(), icon: EyeIcon },
+  const stats = [
+    { label: 'Total Playbooks', value: '12', change: '+2 this month' },
+    { label: 'Team Members', value: '8', change: '+1 this week' },
+    { label: 'Views This Month', value: '156', change: '+23%' },
   ]
 
   return (
@@ -44,22 +35,20 @@ export default async function DashboardPage() {
           Welcome back, {user.user_metadata?.name?.split(' ')[0] || 'there'}
         </h1>
         <p className="mt-1 text-lg text-slate-600">
-          Here's what's happening with <span className="font-medium">{workspace.name}</span> today.
+          Here's what's happening with your workspace today.
         </p>
       </div>
 
       {/* Stats */}
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {statsDisplay.map((stat) => (
+        {stats.map((stat) => (
           <div
             key={stat.label}
-            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md"
+            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
           >
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-600">{stat.label}</p>
-              <stat.icon className="h-5 w-5 text-slate-400" />
-            </div>
+            <p className="text-sm font-medium text-slate-600">{stat.label}</p>
             <p className="mt-2 text-3xl font-bold text-slate-900">{stat.value}</p>
+            <p className="mt-1 text-sm text-green-600">{stat.change}</p>
           </div>
         ))}
       </div>
@@ -99,7 +88,7 @@ export default async function DashboardPage() {
           </Link>
 
           <Link
-            href="/settings?tab=team"
+            href="/settings"
             className="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-indigo-200 hover:shadow-lg"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 text-white transition-transform group-hover:scale-110">
@@ -158,12 +147,10 @@ export default async function DashboardPage() {
                       </div>
                       <div>
                         <p className="font-medium text-slate-900">{playbook.title}</p>
-                        <p className="text-sm text-slate-500">
-                          Updated {formatDistanceToNow(playbook.updated_at)}
-                        </p>
+                        <p className="text-sm text-slate-500">Updated {playbook.updatedAt}</p>
                       </div>
                     </div>
-                    <span className={`rounded-full px-3 py-1 text-xs font-medium ${getCategoryColor(playbook.category)}`}>
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
                       {playbook.category}
                     </span>
                   </Link>
@@ -194,78 +181,38 @@ export default async function DashboardPage() {
       </div>
 
       {/* Getting Started Guide */}
-      {stats.totalPlaybooks === 0 && (
-        <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-blue-50 p-6">
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">Getting Started</h2>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">
-                1
-              </div>
-              <div>
-                <h3 className="font-medium text-slate-900">Create a playbook</h3>
-                <p className="text-sm text-slate-600">Document your first operational process</p>
-              </div>
+      <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-blue-50 p-6">
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">Getting Started</h2>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="flex items-start gap-3">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">
+              1
             </div>
-            <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">
-                2
-              </div>
-              <div>
-                <h3 className="font-medium text-slate-900">Add your team</h3>
-                <p className="text-sm text-slate-600">Invite colleagues to collaborate</p>
-              </div>
+            <div>
+              <h3 className="font-medium text-slate-900">Create a playbook</h3>
+              <p className="text-sm text-slate-600">Document your first operational process</p>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">
-                3
-              </div>
-              <div>
-                <h3 className="font-medium text-slate-900">Share & execute</h3>
-                <p className="text-sm text-slate-600">Use playbooks in daily operations</p>
-              </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">
+              2
+            </div>
+            <div>
+              <h3 className="font-medium text-slate-900">Add your team</h3>
+              <p className="text-sm text-slate-600">Invite colleagues to collaborate</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">
+              3
+            </div>
+            <div>
+              <h3 className="font-medium text-slate-900">Share & execute</h3>
+              <p className="text-sm text-slate-600">Use playbooks in daily operations</p>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </DashboardLayout>
-  )
-}
-
-function getCategoryColor(category: string) {
-  const colors: Record<string, string> = {
-    HR: 'bg-blue-100 text-blue-700',
-    Operations: 'bg-purple-100 text-purple-700',
-    Support: 'bg-green-100 text-green-700',
-    Finance: 'bg-yellow-100 text-yellow-700',
-    Marketing: 'bg-pink-100 text-pink-700',
-    Sales: 'bg-cyan-100 text-cyan-700',
-    Other: 'bg-slate-100 text-slate-700',
-  }
-  return colors[category] || colors.Other
-}
-
-function BookIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-    </svg>
-  )
-}
-
-function UsersIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-    </svg>
-  )
-}
-
-function EyeIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-    </svg>
   )
 }
