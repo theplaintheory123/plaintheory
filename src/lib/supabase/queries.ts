@@ -791,3 +791,121 @@ export async function getSharedPlaybook(shareLink: string, playbookId: string): 
 
   return data
 }
+
+// ============ Invite Link Queries ============
+
+export async function enableInviteLink(workspaceId: string): Promise<string | null> {
+  const supabase = await createClient()
+
+  // Generate invite link
+  const inviteLink = crypto.randomUUID().replace(/-/g, '').substring(0, 12)
+  console.log('Generating invite link:', inviteLink, 'for workspace:', workspaceId)
+
+  const { data, error } = await supabase
+    .from('workspaces')
+    .update({
+      invite_link_enabled: true,
+      invite_link: inviteLink,
+    })
+    .eq('id', workspaceId)
+    .select('invite_link, invite_link_enabled')
+    .single()
+
+  console.log('Update result:', { data, error })
+
+  if (error) {
+    console.error('Error enabling invite link:', error)
+    return null
+  }
+  return data?.invite_link
+}
+
+export async function disableInviteLink(workspaceId: string): Promise<boolean> {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('workspaces')
+    .update({
+      invite_link_enabled: false,
+    })
+    .eq('id', workspaceId)
+
+  if (error) {
+    console.error('Error disabling invite link:', error)
+    return false
+  }
+  return true
+}
+
+export async function getWorkspaceByInviteLink(inviteLink: string): Promise<Workspace | null> {
+  const supabase = await createClient()
+  console.log('Looking for invite link:', inviteLink)
+
+  // First, check if any workspace has this invite link (regardless of enabled status)
+  const { data: debugData } = await supabase
+    .from('workspaces')
+    .select('id, name, invite_link, invite_link_enabled')
+    .eq('invite_link', inviteLink)
+
+  console.log('Debug - Workspace with this link:', debugData)
+
+  const { data, error } = await supabase
+    .from('workspaces')
+    .select('*, owner:profiles!owner_id(id, full_name, email)')
+    .eq('invite_link', inviteLink)
+    .eq('invite_link_enabled', true)
+    .single()
+
+  if (error) {
+    console.error('Error fetching workspace by invite link:', error.message, error.code)
+    return null
+  }
+  console.log('Found workspace:', data?.name)
+  return data
+}
+
+export async function joinWorkspaceViaLink(
+  workspaceId: string,
+  userId: string,
+  role: 'admin' | 'editor' | 'viewer' = 'viewer'
+): Promise<boolean> {
+  const supabase = await createClient()
+
+  // Check if already a member
+  const { data: existing } = await supabase
+    .from('workspace_members')
+    .select('id')
+    .eq('workspace_id', workspaceId)
+    .eq('user_id', userId)
+    .single()
+
+  if (existing) {
+    return true // Already a member
+  }
+
+  // Check if user is the owner
+  const { data: workspace } = await supabase
+    .from('workspaces')
+    .select('owner_id')
+    .eq('id', workspaceId)
+    .single()
+
+  if (workspace?.owner_id === userId) {
+    return true // User is owner
+  }
+
+  const { error } = await supabase
+    .from('workspace_members')
+    .insert({
+      workspace_id: workspaceId,
+      user_id: userId,
+      role,
+      joined_at: new Date().toISOString(),
+    })
+
+  if (error) {
+    console.error('Error joining workspace:', error)
+    return false
+  }
+  return true
+}

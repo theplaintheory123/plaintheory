@@ -23,6 +23,8 @@ export interface Workspace {
   share_link: string | null
   share_pin: string | null
   share_enabled: boolean
+  invite_link: string | null
+  invite_link_enabled: boolean
   created_at: string
   updated_at: string
   // Relations

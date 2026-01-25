@@ -14,6 +14,8 @@ import {
   disableSharing,
   updateSharePin,
   getUserWorkspace,
+  enableInviteLink,
+  disableInviteLink,
 } from '@/lib/supabase/queries'
 import type { TeamRole } from '@/lib/types/database'
 
@@ -304,4 +306,61 @@ export async function regenerateShareLink(workspaceId: string): Promise<{ shareL
 
   revalidatePath('/settings')
   return { shareLink }
+}
+
+// ============ Invite Link Actions ============
+
+export async function toggleInviteLink(
+  workspaceId: string,
+  enable: boolean
+): Promise<{ inviteLink?: string; error?: string }> {
+  console.log('toggleInviteLink called:', { workspaceId, enable })
+
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    console.log('toggleInviteLink: Not authenticated')
+    return { error: 'Not authenticated' }
+  }
+
+  console.log('toggleInviteLink: User authenticated:', user.id)
+
+  if (enable) {
+    console.log('toggleInviteLink: Enabling invite link...')
+    const inviteLink = await enableInviteLink(workspaceId)
+    console.log('toggleInviteLink: Result:', inviteLink)
+    if (!inviteLink) {
+      return { error: 'Failed to enable invite link' }
+    }
+    revalidatePath('/settings')
+    return { inviteLink }
+  } else {
+    const success = await disableInviteLink(workspaceId)
+    if (!success) {
+      return { error: 'Failed to disable invite link' }
+    }
+    revalidatePath('/settings')
+    return {}
+  }
+}
+
+export async function regenerateInviteLink(workspaceId: string): Promise<{ inviteLink?: string; error?: string }> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  // Disable and re-enable to regenerate
+  await disableInviteLink(workspaceId)
+  const inviteLink = await enableInviteLink(workspaceId)
+
+  if (!inviteLink) {
+    return { error: 'Failed to regenerate invite link' }
+  }
+
+  revalidatePath('/settings')
+  return { inviteLink }
 }

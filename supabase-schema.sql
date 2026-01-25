@@ -124,8 +124,14 @@ CREATE TABLE public.workspaces (
   share_link text UNIQUE,
   share_pin text,
   share_enabled boolean DEFAULT false,
+  invite_link text UNIQUE,
+  invite_link_enabled boolean DEFAULT false,
   created_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
   updated_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
   CONSTRAINT workspaces_pkey PRIMARY KEY (id),
   CONSTRAINT workspaces_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.profiles(id)
 );
+
+-- Migration to add invite link columns (run this if table already exists):
+-- ALTER TABLE public.workspaces ADD COLUMN invite_link text UNIQUE;
+-- ALTER TABLE public.workspaces ADD COLUMN invite_link_enabled boolean DEFAULT false;
