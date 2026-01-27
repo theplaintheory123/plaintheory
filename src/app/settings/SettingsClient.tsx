@@ -38,6 +38,7 @@ import {
   ChevronRight,
   ExternalLink,
 } from 'lucide-react'
+import { SupabaseClient } from '@supabase/supabase-js'
 
 type User = {
   id?: string
@@ -125,12 +126,14 @@ export function SettingsClient({ user, profile, workspace, members, isOwner, ini
     })
   }
 
-  const handleInvite = () => {
+  const handleInvite = async () => {
     if (!inviteEmail) return
 
     const formData = new FormData()
     formData.set('email', inviteEmail)
     formData.set('role', inviteRole)
+    
+
 
     startTransition(async () => {
       const result = await inviteTeamMember(workspace.id, { error: undefined, success: false }, formData)

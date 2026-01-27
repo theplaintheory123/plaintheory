@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getUserWorkspace } from '@/lib/supabase/queries'
+import { getUserWorkspace, getPlaybooks } from '@/lib/supabase/queries'
 import { SearchClient } from './SearchClient'
+import DashboardLayout from '@/components/ui/DashboardLayout'
 
 export default async function SearchPage() {
   const supabase = await createClient()
@@ -19,5 +20,11 @@ export default async function SearchPage() {
     redirect('/onboarding')
   }
 
-  return <SearchClient workspaceId={workspace.id} />
+  const playbooks = await getPlaybooks(workspace.id)
+
+  return (
+    <DashboardLayout user={user}>
+      <SearchClient workspaceId={workspace.id} playbooksCount={playbooks.length} />
+    </DashboardLayout>
+  )
 }

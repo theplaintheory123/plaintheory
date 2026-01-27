@@ -5,6 +5,21 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { Template } from '@/lib/types/database'
 import { useTemplateAction } from '@/lib/actions/playbook'
+import {
+  Layers,
+  Star,
+  ListChecks,
+  Users,
+  ArrowRight,
+  Filter,
+  Sparkles,
+  Loader2,
+  Lightbulb,
+  Mail,
+  LayoutTemplate,
+  TrendingUp,
+  Crown,
+} from 'lucide-react'
 
 type Props = {
   templates: Template[]
@@ -27,6 +42,15 @@ export function TemplatesClient({ templates, featuredTemplate, workspaceId }: Pr
     return templates.filter((t) => t.category === selectedCategory)
   }, [templates, selectedCategory])
 
+  // Calculate category counts
+  const categoryCounts = templates.reduce((acc, t) => {
+    acc[t.category] = (acc[t.category] || 0) + 1
+    return acc
+  }, {} as Record<string, number>)
+
+  // Get total uses
+  const totalUses = templates.reduce((sum, t) => sum + (t.uses_count || 0), 0)
+
   const handleUseTemplate = async (templateId: string) => {
     setLoadingTemplate(templateId)
     startTransition(async () => {
@@ -41,72 +65,133 @@ export function TemplatesClient({ templates, featuredTemplate, workspaceId }: Pr
 
   return (
     <>
+      {/* Stats Bar */}
+      <div className="mb-8 grid gap-4 sm:grid-cols-3">
+        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
+            <LayoutTemplate className="h-5 w-5 text-indigo-600" strokeWidth={1.5} />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-slate-900">{templates.length}</p>
+            <p className="text-xs font-medium text-slate-500">Available Templates</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50">
+            <Layers className="h-5 w-5 text-purple-600" strokeWidth={1.5} />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-slate-900">{Object.keys(categoryCounts).length}</p>
+            <p className="text-xs font-medium text-slate-500">Categories</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50">
+            <TrendingUp className="h-5 w-5 text-emerald-600" strokeWidth={1.5} />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-slate-900">{totalUses}</p>
+            <p className="text-xs font-medium text-slate-500">Total Uses</p>
+          </div>
+        </div>
+      </div>
+
       {/* Category Filters */}
-      <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
+      <div className="mb-6 flex items-center gap-3 overflow-x-auto pb-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-slate-500">
+          <Filter className="h-4 w-4" strokeWidth={2} />
+          Filter:
+        </span>
         {categories.map((category) => (
           <button
             key={category}
             onClick={() => setSelectedCategory(category)}
-            className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+            className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
               selectedCategory === category
-                ? 'bg-indigo-600 text-white'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50 hover:ring-slate-300'
             }`}
           >
             {category}
+            {category !== 'All' && categoryCounts[category] && (
+              <span className={`ml-1.5 ${selectedCategory === category ? 'text-indigo-200' : 'text-slate-400'}`}>
+                ({categoryCounts[category]})
+              </span>
+            )}
           </button>
         ))}
       </div>
 
       {/* Featured Template */}
       {featuredTemplate && selectedCategory === 'All' && (
-        <div className="mb-8 rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-blue-50 p-6">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700">
-                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
+        <div className="mb-8 overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+          <div className="relative p-6 sm:p-8">
+            <div className="absolute top-4 right-4">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-700">
+                <Crown className="h-3.5 w-3.5" strokeWidth={2} />
                 Most Popular
-              </div>
-              <h2 className="mb-2 text-2xl font-bold text-slate-900">{featuredTemplate.title}</h2>
-              <p className="mb-4 text-slate-600">
-                {featuredTemplate.description}
-              </p>
-              <div className="flex items-center gap-4 text-sm text-slate-600">
-                <span className="flex items-center gap-1">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  {featuredTemplate.steps_count} steps
-                </span>
-                <span className="flex items-center gap-1">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                  {featuredTemplate.uses_count} uses
-                </span>
-              </div>
+              </span>
             </div>
-            <button
-              onClick={() => handleUseTemplate(featuredTemplate.id)}
-              disabled={isPending && loadingTemplate === featuredTemplate.id}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all hover:scale-105 hover:shadow-xl disabled:opacity-50"
-            >
-              {isPending && loadingTemplate === featuredTemplate.id ? (
-                'Creating...'
-              ) : (
-                <>
-                  Use Template
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </>
-              )}
-            </button>
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex-1">
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
+                    <Sparkles className="h-7 w-7" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-slate-900">{featuredTemplate.title}</h2>
+                    <span className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold ${getCategoryColor(featuredTemplate.category)}`}>
+                      {featuredTemplate.category}
+                    </span>
+                  </div>
+                </div>
+                <p className="mb-6 text-slate-600 max-w-xl">
+                  {featuredTemplate.description}
+                </p>
+                <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
+                  <span className="flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 shadow-sm">
+                    <ListChecks className="h-4 w-4 text-indigo-500" strokeWidth={2} />
+                    {featuredTemplate.steps_count} steps
+                  </span>
+                  <span className="flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 shadow-sm">
+                    <Users className="h-4 w-4 text-purple-500" strokeWidth={2} />
+                    {featuredTemplate.uses_count} uses
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => handleUseTemplate(featuredTemplate.id)}
+                disabled={isPending && loadingTemplate === featuredTemplate.id}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-500/30 active:scale-[0.98] disabled:opacity-50"
+              >
+                {isPending && loadingTemplate === featuredTemplate.id ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" strokeWidth={2} />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    Use This Template
+                    <ArrowRight className="h-5 w-5" strokeWidth={2} />
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Results Info */}
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-sm text-slate-500">
+          Showing <span className="font-medium text-slate-900">{filteredTemplates.length}</span>
+          {filteredTemplates.length !== templates.length && (
+            <span> of <span className="font-medium text-slate-900">{templates.length}</span></span>
+          )}
+          {' '}templates
+          {selectedCategory !== 'All' && <span> in <span className="font-medium text-slate-900">{selectedCategory}</span></span>}
+        </p>
+      </div>
 
       {/* Templates Grid */}
       {filteredTemplates.length > 0 ? (
@@ -114,77 +199,95 @@ export function TemplatesClient({ templates, featuredTemplate, workspaceId }: Pr
           {filteredTemplates.map((template) => (
             <div
               key={template.id}
-              className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-indigo-200 hover:shadow-lg"
+              className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-indigo-200 hover:shadow-lg"
             >
               <div className="mb-4 flex items-start justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-100 to-blue-100 text-indigo-600 transition-transform group-hover:scale-110">
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-                  </svg>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 text-indigo-600 transition-transform group-hover:scale-110">
+                  <Layers className="h-6 w-6" strokeWidth={1.5} />
                 </div>
-                <span className={`rounded-full px-3 py-1 text-xs font-medium ${getCategoryColor(template.category)}`}>
+                <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${getCategoryColor(template.category)}`}>
                   {template.category}
                 </span>
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-slate-900 group-hover:text-indigo-600">
+              <h3 className="mb-2 text-lg font-semibold text-slate-900 transition-colors group-hover:text-indigo-600">
                 {template.title}
               </h3>
-              <p className="mb-4 text-sm text-slate-600 line-clamp-2">{template.description}</p>
+              <p className="mb-4 text-sm text-slate-500 line-clamp-2 min-h-[40px]">{template.description}</p>
               <div className="flex items-center justify-between border-t border-slate-100 pt-4">
                 <div className="flex items-center gap-3 text-xs text-slate-500">
-                  <span className="flex items-center gap-1">
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
+                  <span className="flex items-center gap-1.5">
+                    <ListChecks className="h-4 w-4 text-slate-400" strokeWidth={1.5} />
                     {template.steps_count} steps
                   </span>
-                  <span className="flex items-center gap-1">
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
+                  <span className="flex items-center gap-1.5">
+                    <Users className="h-4 w-4 text-slate-400" strokeWidth={1.5} />
                     {template.uses_count} uses
                   </span>
                 </div>
                 <button
                   onClick={() => handleUseTemplate(template.id)}
                   disabled={isPending && loadingTemplate === template.id}
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-500 disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-600 transition-all hover:bg-indigo-100 disabled:opacity-50"
                 >
-                  {isPending && loadingTemplate === template.id ? 'Creating...' : 'Use'}
+                  {isPending && loadingTemplate === template.id ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
+                      Creating
+                    </>
+                  ) : (
+                    <>
+                      Use
+                      <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
+                    </>
+                  )}
                 </button>
               </div>
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 transition-opacity group-hover:opacity-100" />
             </div>
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-            </svg>
+        <div className="rounded-2xl border border-slate-200 bg-white px-8 py-16 text-center">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-100">
+            <Layers className="h-10 w-10 text-slate-400" strokeWidth={1.5} />
           </div>
-          <h3 className="mb-1 font-semibold text-slate-900">No templates in this category</h3>
-          <p className="text-sm text-slate-600">Try selecting a different category</p>
+          <h3 className="mb-2 text-xl font-semibold text-slate-900">No templates in this category</h3>
+          <p className="mb-6 text-sm text-slate-500 max-w-sm mx-auto">
+            Try selecting a different category or browse all templates
+          </p>
+          <button
+            onClick={() => setSelectedCategory('All')}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50"
+          >
+            View All Templates
+          </button>
         </div>
       )}
 
       {/* Request Template */}
-      <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+      <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="p-6 sm:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-slate-500 shadow-sm">
+                <Lightbulb className="h-6 w-6" strokeWidth={1.5} />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">Need a specific template?</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Can't find what you're looking for? Contact us and we'll help you create a custom template for your needs.
+                </p>
+              </div>
+            </div>
+            <a
+              href="mailto:support@plaintheory.com?subject=Template%20Request"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50"
+            >
+              <Mail className="h-4 w-4" strokeWidth={2} />
+              Request Template
+            </a>
+          </div>
         </div>
-        <h3 className="mb-2 text-lg font-semibold text-slate-900">Need a specific template?</h3>
-        <p className="mb-4 text-slate-600">
-          Can't find what you're looking for? Contact us and we'll help you create it.
-        </p>
-        <a
-          href="mailto:support@plantheory.app?subject=Template%20Request"
-          className="rounded-xl border-2 border-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-        >
-          Request Template
-        </a>
       </div>
     </>
   )
@@ -192,12 +295,12 @@ export function TemplatesClient({ templates, featuredTemplate, workspaceId }: Pr
 
 function getCategoryColor(category: string) {
   const colors: Record<string, string> = {
-    HR: 'bg-blue-100 text-blue-700',
-    Operations: 'bg-purple-100 text-purple-700',
-    Support: 'bg-green-100 text-green-700',
-    Finance: 'bg-yellow-100 text-yellow-700',
-    Marketing: 'bg-pink-100 text-pink-700',
-    Sales: 'bg-cyan-100 text-cyan-700',
+    HR: 'bg-blue-50 text-blue-700',
+    Operations: 'bg-purple-50 text-purple-700',
+    Support: 'bg-emerald-50 text-emerald-700',
+    Finance: 'bg-amber-50 text-amber-700',
+    Marketing: 'bg-pink-50 text-pink-700',
+    Sales: 'bg-cyan-50 text-cyan-700',
     Other: 'bg-slate-100 text-slate-700',
   }
   return colors[category] || colors.Other

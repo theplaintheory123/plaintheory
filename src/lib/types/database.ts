@@ -2,12 +2,14 @@
 
 export type PlaybookCategory = 'HR' | 'Operations' | 'Support' | 'Finance' | 'Marketing' | 'Sales' | 'Other'
 export type TeamRole = 'admin' | 'editor' | 'viewer'
+export type SystemRole = 'owner' | 'member'
 
 export interface Profile {
   id: string
   email: string
   full_name: string | null
   avatar_url: string | null
+  role: SystemRole
   created_at: string
   updated_at: string
 }

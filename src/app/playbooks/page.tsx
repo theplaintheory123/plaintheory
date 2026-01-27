@@ -33,9 +33,15 @@ export default async function PlaybooksPage({ searchParams }: Props) {
   return (
     <DashboardLayout user={user}>
       {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-900">Playbooks</h1>
-        <p className="mt-1 text-slate-500">Manage your operational playbooks</p>
+      <div className="mb-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Playbooks</h1>
+            <p className="mt-1 text-sm text-slate-500 sm:text-base">
+              Manage and organize your operational playbooks
+            </p>
+          </div>
+        </div>
       </div>
 
       <PlaybooksClient playbooks={playbooks} initialCategory={category || 'All'} />

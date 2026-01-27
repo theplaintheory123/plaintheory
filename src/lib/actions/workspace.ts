@@ -17,6 +17,8 @@ import {
   enableInviteLink,
   disableInviteLink,
 } from '@/lib/supabase/queries'
+import { generateInviteLink } from '@/lib/services/invite'
+import { sendInviteEmail } from '@/lib/services/email'
 import type { TeamRole } from '@/lib/types/database'
 
 export type FormState = {
@@ -164,7 +166,7 @@ export async function inviteTeamMember(
   workspaceId: string,
   prevState: FormState,
   formData: FormData
-): Promise<FormState> {
+): Promise<FormState & { inviteLink?: string }> {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -184,14 +186,55 @@ export async function inviteTeamMember(
     return { error: 'Invalid email address' }
   }
 
-  const success = await inviteMember(workspaceId, email, role, user.id)
+  // Get inviter's profile and workspace info for the email
+  const [profileResult, workspaceResult] = await Promise.all([
+    supabase.from('profiles').select('full_name').eq('id', user.id).single(),
+    supabase.from('workspaces').select('name').eq('id', workspaceId).single(),
+  ])
 
-  if (!success) {
-    return { error: 'Failed to send invitation. The user may already be invited.' }
+  const inviterName = profileResult.data?.full_name || user.email || 'A team member'
+  const workspaceName = workspaceResult.data?.name || 'the workspace'
+
+  // Generate Supabase Auth invite link
+  const inviteResult = await generateInviteLink({
+    email,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/invite/accept?workspace=${workspaceId}&role=${role}`,
+  })
+
+  if (!inviteResult.success) {
+    return { error: inviteResult.error || 'Failed to generate invite link' }
+  }
+
+  // Store invitation in database for tracking
+  const dbSuccess = await inviteMember(workspaceId, email, role, user.id)
+
+  if (!dbSuccess) {
+    return { error: 'Failed to save invitation. The user may already be invited.' }
+  }
+
+  // Send invitation email
+  const emailResult = await sendInviteEmail({
+    to: email,
+    inviterName,
+    workspaceName,
+    inviteLink: inviteResult.inviteLink!,
+    role,
+  })
+
+  if (!emailResult.success) {
+    console.error('Failed to send invite email:', emailResult.error)
+    // Don't fail the whole operation if email fails - invitation is still created
   }
 
   revalidatePath('/settings')
-  return { success: true, message: `Invitation sent to ${email}` }
+
+  return {
+    success: true,
+    message: emailResult.success
+      ? `Invitation sent to ${email}`
+      : `Invitation created for ${email} (email delivery failed)`,
+    inviteLink: inviteResult.inviteLink,
+  }
 }
 
 export async function updateTeamMemberRole(
@@ -363,4 +406,62 @@ export async function regenerateInviteLink(workspaceId: string): Promise<{ invit
 
   revalidatePath('/settings')
   return { inviteLink }
+}
+
+// ============ Share Invite Link via Email ============
+
+export async function shareInviteLinkByEmail(
+  workspaceId: string,
+  email: string
+): Promise<FormState> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  if (!email || !email.includes('@')) {
+    return { error: 'Valid email is required' }
+  }
+
+  // Get workspace with invite link
+  const { data: workspace, error: wsError } = await supabase
+    .from('workspaces')
+    .select('name, invite_link, invite_link_enabled')
+    .eq('id', workspaceId)
+    .single()
+
+  if (wsError || !workspace) {
+    return { error: 'Workspace not found' }
+  }
+
+  if (!workspace.invite_link_enabled || !workspace.invite_link) {
+    return { error: 'Invite link is not enabled for this workspace' }
+  }
+
+  // Get inviter's name
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name')
+    .eq('id', user.id)
+    .single()
+
+  const inviterName = profile?.full_name || user.email || 'A team member'
+  const fullInviteLink = `${process.env.NEXT_PUBLIC_SITE_URL}/invite/${workspace.invite_link}`
+
+  // Send email with the invite link
+  const emailResult = await sendInviteEmail({
+    to: email,
+    inviterName,
+    workspaceName: workspace.name,
+    inviteLink: fullInviteLink,
+    role: 'viewer',
+  })
+
+  if (!emailResult.success) {
+    return { error: emailResult.error || 'Failed to send email' }
+  }
+
+  return { success: true, message: `Invite link sent to ${email}` }
 }

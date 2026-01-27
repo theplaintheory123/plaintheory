@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signout } from '@/app/auth/actions'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   LayoutDashboard,
   BookOpen,
@@ -17,6 +17,11 @@ import {
   Plus,
   ChevronRight,
   HelpCircle,
+  Bell,
+  ChevronDown,
+  User,
+  Shield,
+  ExternalLink,
 } from 'lucide-react'
 
 type User = {
@@ -46,12 +51,25 @@ const bottomNavigation = [
 export default function DashboardLayout({ children, user }: DashboardLayoutProps) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement>(null)
 
   const userInitial = user.user_metadata?.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'
   const userName = user.user_metadata?.name || user.email?.split('@')[0] || 'User'
   const userEmail = user.email || ''
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   return (
     <div className="flex h-screen bg-slate-50">
@@ -143,28 +161,64 @@ export default function DashboardLayout({ children, user }: DashboardLayoutProps
         </nav>
 
         {/* User Section */}
-        <div className="border-t border-slate-100 p-4">
-          <div className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-slate-50">
-            <div className="relative">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-semibold text-white shadow-md">
-                {userInitial}
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="truncate text-sm font-medium text-slate-900">{userName}</p>
-              <p className="truncate text-xs text-slate-500">{userEmail}</p>
-            </div>
-          </div>
-          <form action={signout} className="mt-2">
+        <div className="border-t border-slate-100 p-4" ref={userMenuRef}>
+          <div className="relative">
             <button
-              type="submit"
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500 transition-all hover:bg-slate-50 hover:text-slate-700"
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex w-full items-center gap-3 rounded-xl p-2 transition-colors hover:bg-slate-50"
             >
-              <LogOut className="h-5 w-5" strokeWidth={1.75} />
-              Sign out
+              <div className="relative">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-semibold text-white shadow-md">
+                  {userInitial}
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500" />
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <p className="truncate text-sm font-medium text-slate-900">{userName}</p>
+                <p className="truncate text-xs text-slate-500">{userEmail}</p>
+              </div>
+              <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
             </button>
-          </form>
+
+            {/* User Dropdown Menu */}
+            {userMenuOpen && (
+              <div className="absolute bottom-full left-0 right-0 mb-2 rounded-xl border border-slate-200 bg-white py-2 shadow-lg">
+                <Link
+                  href="/settings?tab=profile"
+                  onClick={() => setUserMenuOpen(false)}
+                  className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                >
+                  <User className="h-4 w-4 text-slate-400" strokeWidth={2} />
+                  Your Profile
+                </Link>
+                <Link
+                  href="/settings?tab=workspace"
+                  onClick={() => setUserMenuOpen(false)}
+                  className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                >
+                  <Shield className="h-4 w-4 text-slate-400" strokeWidth={2} />
+                  Workspace Settings
+                </Link>
+                <a
+                  href="mailto:support@plaintheory.com"
+                  className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                >
+                  <HelpCircle className="h-4 w-4 text-slate-400" strokeWidth={2} />
+                  Help & Support
+                </a>
+                <div className="my-2 border-t border-slate-100" />
+                <form action={signout}>
+                  <button
+                    type="submit"
+                    className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                  >
+                    <LogOut className="h-4 w-4" strokeWidth={2} />
+                    Sign out
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
         </div>
       </aside>
 

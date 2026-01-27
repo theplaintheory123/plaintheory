@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getUserWorkspace } from '@/lib/supabase/queries'
+import { getUserWorkspace, autoJoinFromPendingInvitation } from '@/lib/supabase/queries'
 import { OnboardingClient } from './OnboardingClient'
 
 export default async function OnboardingPage() {
@@ -14,11 +14,22 @@ export default async function OnboardingPage() {
     redirect('/auth/login')
   }
 
-  // Check if user already has a workspace
-  const workspace = await getUserWorkspace(user.id)
+  // Check if user already has a workspace (either as owner or member)
+  let workspace = await getUserWorkspace(user.id)
   if (workspace) {
     redirect('/dashboard')
   }
 
+  // Check if user has a pending invitation and auto-join
+  // This handles the case where invited users land on onboarding by mistake
+  if (user.email) {
+    const { joined } = await autoJoinFromPendingInvitation(user.id, user.email)
+    if (joined) {
+      redirect('/dashboard')
+    }
+  }
+
+  // Only show onboarding to users who need to create a new workspace
+  // (i.e., they have no workspace and no pending invitations)
   return <OnboardingClient />
 }

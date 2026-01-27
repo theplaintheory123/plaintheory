@@ -114,6 +114,13 @@ export async function createWorkspace(
     console.error('Error creating workspace:', error)
     return null
   }
+
+  // Set the owner's profile role to 'owner'
+  await supabase
+    .from('profiles')
+    .update({ role: 'owner' })
+    .eq('id', ownerId)
+
   return data
 }
 
@@ -907,5 +914,97 @@ export async function joinWorkspaceViaLink(
     console.error('Error joining workspace:', error)
     return false
   }
+
+  // Set member's profile role if not already set
+  await supabase
+    .from('profiles')
+    .update({ role: 'member' })
+    .eq('id', userId)
+    .is('role', null)
+
   return true
+}
+
+// ============ Pending Invitation Queries ============
+
+export async function getPendingInvitationByEmail(email: string) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('workspace_invitations')
+    .select(`
+      *,
+      workspace:workspaces(id, name)
+    `)
+    .eq('email', email)
+    .gt('expires_at', new Date().toISOString())
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (error) {
+    return null
+  }
+  return data
+}
+
+export async function acceptInvitation(
+  invitationId: string,
+  userId: string
+): Promise<{ success: boolean; workspaceId?: string }> {
+  const supabase = await createClient()
+
+  // Get the invitation
+  const { data: invitation, error: inviteError } = await supabase
+    .from('workspace_invitations')
+    .select('*')
+    .eq('id', invitationId)
+    .single()
+
+  if (inviteError || !invitation) {
+    return { success: false }
+  }
+
+  // Check if invitation is expired
+  if (new Date(invitation.expires_at) < new Date()) {
+    return { success: false }
+  }
+
+  // Add user to workspace
+  const joined = await joinWorkspaceViaLink(
+    invitation.workspace_id,
+    userId,
+    invitation.role
+  )
+
+  if (!joined) {
+    return { success: false }
+  }
+
+  // Delete the invitation (it's been used)
+  await supabase
+    .from('workspace_invitations')
+    .delete()
+    .eq('id', invitationId)
+
+  return { success: true, workspaceId: invitation.workspace_id }
+}
+
+export async function autoJoinFromPendingInvitation(
+  userId: string,
+  email: string
+): Promise<{ joined: boolean; workspaceId?: string }> {
+  const invitation = await getPendingInvitationByEmail(email)
+
+  if (!invitation) {
+    return { joined: false }
+  }
+
+  const result = await acceptInvitation(invitation.id, userId)
+
+  if (result.success) {
+    return { joined: true, workspaceId: result.workspaceId }
+  }
+
+  return { joined: false }
 }

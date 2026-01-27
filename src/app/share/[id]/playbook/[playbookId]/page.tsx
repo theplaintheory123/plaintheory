@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getWorkspaceByShareLink, getSharedPlaybook } from '@/lib/supabase/queries'
 import { formatDate } from '@/lib/utils/date'
+import Image from 'next/image'
 
 type Props = {
   params: Promise<{ id: string; playbookId: string }>
@@ -28,10 +29,7 @@ export default async function SharedPlaybookPage({ params }: Props) {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-blue-700 shadow-lg">
-              <span className="text-xl font-bold text-white">P</span>
-            </div>
-            <span className="text-xl font-bold text-slate-900">Plantheory</span>
+              <Image src="logo-text.svg" width={140} height={140} alt='plaintheory' priority className="transition-transform duration-300 group-hover:scale-105" />
           </div>
           <Link
             href="/auth/login"

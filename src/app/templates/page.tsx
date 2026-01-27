@@ -29,10 +29,14 @@ export default async function TemplatesPage() {
     <DashboardLayout user={user}>
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Templates</h1>
-        <p className="mt-1 text-slate-600">
-          Start with pre-built playbook templates for common business processes
-        </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Templates</h1>
+            <p className="mt-1 text-sm text-slate-500 sm:text-base">
+              Start with pre-built playbook templates for common business processes
+            </p>
+          </div>
+        </div>
       </div>
 
       <TemplatesClient
