@@ -19,6 +19,9 @@ import {
   History,
   Filter,
   Command,
+  ChevronRight,
+  Hash,
+  Link2,
 } from 'lucide-react'
 
 type Props = {
@@ -27,7 +30,7 @@ type Props = {
 }
 
 const filterOptions = [
-  { value: 'all', label: 'All Results', icon: Search },
+  { value: 'all', label: 'All', icon: Search },
   { value: 'playbooks', label: 'Playbooks', icon: BookOpen },
   { value: 'steps', label: 'Steps', icon: ListChecks },
   { value: 'tools', label: 'Tools', icon: Wrench },
@@ -102,20 +105,20 @@ export function SearchClient({ workspaceId, playbooksCount }: Props) {
     switch (type) {
       case 'playbook':
         return (
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50">
-            <BookOpen className="h-5 w-5 text-indigo-600" strokeWidth={1.5} />
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+            <BookOpen className="w-5 h-5 text-emerald-600" />
           </div>
         )
       case 'step':
         return (
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50">
-            <ListChecks className="h-5 w-5 text-emerald-600" strokeWidth={1.5} />
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+            <ListChecks className="w-5 h-5 text-blue-600" />
           </div>
         )
       case 'tool':
         return (
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-purple-50">
-            <Wrench className="h-5 w-5 text-purple-600" strokeWidth={1.5} />
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-purple-50 flex items-center justify-center flex-shrink-0">
+            <Wrench className="w-5 h-5 text-purple-600" />
           </div>
         )
       default:
@@ -132,88 +135,91 @@ export function SearchClient({ workspaceId, playbooksCount }: Props) {
   }
 
   return (
-    <>
+    <div className="space-y-6 sm:space-y-8">
       {/* Page Header */}
-      <div className="mb-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Search</h1>
-            <p className="mt-1 text-sm text-slate-500 sm:text-base">
-              Find playbooks, steps, and tools across your workspace
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <FileText className="h-4 w-4" />
-            <span>{playbooksCount} playbooks indexed</span>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-light text-gray-900">
+            <span className="font-medium text-gray-900">Search</span>
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Find playbooks, steps, and tools across your workspace
+          </p>
+        </div>
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 bg-white px-3 py-2 rounded-xl border border-gray-200">
+          <FileText className="w-4 h-4" />
+          <span>{playbooksCount} playbooks indexed</span>
         </div>
       </div>
 
       {/* Search Box */}
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" strokeWidth={2} />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search playbooks, steps, tools..."
-            className="w-full rounded-2xl border-2 border-slate-200 bg-white py-4 pl-14 pr-14 text-lg text-slate-900 shadow-sm transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10"
-            autoFocus
-          />
-          {isSearching ? (
-            <div className="absolute right-5 top-1/2 -translate-y-1/2">
-              <Loader2 className="h-5 w-5 animate-spin text-indigo-600" strokeWidth={2} />
-            </div>
-          ) : query.length > 0 ? (
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search playbooks, steps, tools..."
+          className="w-full pl-12 pr-20 py-4 text-base sm:text-lg bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-sm"
+          autoFocus
+        />
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+          {isSearching && (
+            <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
+          )}
+          {query.length > 0 && !isSearching && (
             <button
               onClick={() => setQuery('')}
-              className="absolute right-5 top-1/2 -translate-y-1/2 rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <X className="h-5 w-5" strokeWidth={2} />
+              <X className="w-5 h-5" />
             </button>
-          ) : (
-            <div className="absolute right-5 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1">
-              <Command className="h-3.5 w-3.5 text-slate-400" />
-              <span className="text-xs font-medium text-slate-400">K</span>
-            </div>
           )}
+          <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-lg text-gray-400">
+            <Command className="w-3.5 h-3.5" />
+            <span className="text-xs">K</span>
+          </div>
         </div>
       </div>
 
-      {/* Filter Pills */}
-      <div className="mb-6 flex items-center gap-2 overflow-x-auto pb-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-slate-500">
-          <Filter className="h-4 w-4" strokeWidth={2} />
+      {/* Filter Pills - Scrollable on Mobile */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-200">
+        <span className="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
+          <Filter className="w-3 h-3" />
           Filter:
         </span>
         {filterOptions.map(({ value, label, icon: Icon }) => (
           <button
             key={value}
             onClick={() => setFilter(value)}
-            className={`flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
+            className={`flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               filter === value
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-                : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50 hover:ring-slate-300'
+                ? 'bg-emerald-600 text-white'
+                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
             }`}
           >
-            <Icon className="h-4 w-4" strokeWidth={2} />
+            <Icon className="w-3.5 h-3.5" />
             {label}
             {query.length >= 2 && (
-              <span className={`ml-1 ${filter === value ? 'text-indigo-200' : 'text-slate-400'}`}>
-                ({resultCounts[value]})
+              <span className={`ml-0.5 ${filter === value ? 'text-emerald-200' : 'text-gray-400'}`}>
+                {resultCounts[value]}
               </span>
             )}
           </button>
         ))}
       </div>
 
-      {/* Results */}
+      {/* Results Info */}
       {query.length >= 2 && (
-        <div className="mb-4 flex items-center justify-between">
-          <p className="text-sm text-slate-500">
-            Showing <span className="font-medium text-slate-900">{filteredResults.length}</span> results for "<span className="font-medium text-slate-900">{query}</span>"
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            Found <span className="font-medium text-gray-900">{filteredResults.length}</span> result{filteredResults.length !== 1 ? 's' : ''} for "<span className="font-medium text-gray-900">{query}</span>"
           </p>
+          {filteredResults.length > 0 && (
+            <span className="text-xs text-gray-400">
+              Sorted by relevance
+            </span>
+          )}
         </div>
       )}
 
@@ -223,64 +229,78 @@ export function SearchClient({ workspaceId, playbooksCount }: Props) {
           {filteredResults.map((result) => (
             <div
               key={`${result.result_type}-${result.result_id}`}
-              className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-indigo-200 hover:shadow-md"
+              className="group bg-white rounded-xl border border-gray-200 p-4 sm:p-5 hover:border-emerald-200 hover:shadow-md transition-all"
             >
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-3 sm:gap-4">
                 {getTypeIcon(result.result_type)}
+                
                 <div className="flex-1 min-w-0">
-                  <div className="mb-2 flex items-center gap-2">
-                    <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold capitalize ${
-                      result.result_type === 'playbook' ? 'bg-indigo-50 text-indigo-700' :
-                      result.result_type === 'step' ? 'bg-emerald-50 text-emerald-700' :
+                  {/* Type Badge and Context */}
+                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                      result.result_type === 'playbook' ? 'bg-emerald-50 text-emerald-700' :
+                      result.result_type === 'step' ? 'bg-blue-50 text-blue-700' :
                       'bg-purple-50 text-purple-700'
                     }`}>
                       {result.result_type}
                     </span>
                     {result.playbook_title && result.result_type !== 'playbook' && (
-                      <span className="text-xs text-slate-400">
-                        in {result.playbook_title}
-                      </span>
+                      <>
+                        <ChevronRight className="w-3 h-3 text-gray-400" />
+                        <span className="text-xs text-gray-500 truncate max-w-[200px]">
+                          {result.playbook_title}
+                        </span>
+                      </>
                     )}
                   </div>
+
+                  {/* Title */}
                   {result.result_type === 'playbook' ? (
                     <Link
                       href={`/playbooks/${result.result_id}`}
-                      className="text-lg font-semibold text-slate-900 transition-colors hover:text-indigo-600"
+                      className="text-base sm:text-lg font-medium text-gray-900 hover:text-emerald-600 transition-colors inline-flex items-center gap-1"
                     >
                       {result.title}
+                      <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </Link>
                   ) : result.result_type === 'tool' && result.description ? (
                     <a
                       href={result.description}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-lg font-semibold text-slate-900 transition-colors hover:text-indigo-600"
+                      className="text-base sm:text-lg font-medium text-gray-900 hover:text-emerald-600 transition-colors inline-flex items-center gap-2"
                     >
                       {result.title}
-                      <ExternalLink className="h-4 w-4" strokeWidth={2} />
+                      <ExternalLink className="w-4 h-4" />
                     </a>
                   ) : (
-                    <p className="text-lg font-semibold text-slate-900">{result.title}</p>
+                    <p className="text-base sm:text-lg font-medium text-gray-900">{result.title}</p>
                   )}
+
+                  {/* Description */}
                   {result.result_type !== 'tool' && result.description && (
-                    <p className="mt-1 text-sm text-slate-500 line-clamp-2">{result.description}</p>
+                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">{result.description}</p>
                   )}
+
+                  {/* View Link for nested items */}
                   {result.playbook_title && result.result_type !== 'playbook' && (
                     <Link
                       href={`/playbooks/${result.playbook_id}`}
-                      className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-700"
+                      className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 mt-2"
                     >
-                      View playbook
-                      <ArrowUpRight className="h-4 w-4" strokeWidth={2} />
+                      View full playbook
+                      <ArrowUpRight className="w-3 h-3" />
                     </Link>
                   )}
                 </div>
+
+                {/* Quick Action */}
                 {result.result_type === 'playbook' && (
                   <Link
                     href={`/playbooks/${result.result_id}`}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-300 opacity-0 transition-all group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:opacity-100"
+                    className="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 opacity-0 group-hover:opacity-100 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-all"
                   >
-                    <ArrowUpRight className="h-5 w-5" strokeWidth={2} />
+                    <ArrowUpRight className="w-4 h-4" />
                   </Link>
                 )}
               </div>
@@ -291,17 +311,17 @@ export function SearchClient({ workspaceId, playbooksCount }: Props) {
 
       {/* Empty State - No Results */}
       {filteredResults.length === 0 && query.length >= 2 && !isSearching && (
-        <div className="rounded-2xl border border-slate-200 bg-white px-8 py-16 text-center">
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-100">
-            <Search className="h-10 w-10 text-slate-400" strokeWidth={1.5} />
+        <div className="bg-white rounded-xl border border-gray-200 py-12 sm:py-16 text-center">
+          <div className="inline-flex p-3 bg-gray-100 rounded-xl mb-4">
+            <Search className="w-6 h-6 text-gray-400" />
           </div>
-          <h3 className="mb-2 text-xl font-semibold text-slate-900">No results found</h3>
-          <p className="mb-6 max-w-sm mx-auto text-sm text-slate-500">
-            We couldn't find anything matching "<span className="font-medium">{query}</span>". Try different keywords or check your spelling.
+          <h3 className="text-base font-medium text-gray-900 mb-1">No results found</h3>
+          <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
+            We couldn't find anything matching "<span className="font-medium text-gray-700">{query}</span>". Try different keywords.
           </p>
           <button
             onClick={() => setQuery('')}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50"
+            className="inline-flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors"
           >
             Clear search
           </button>
@@ -310,25 +330,25 @@ export function SearchClient({ workspaceId, playbooksCount }: Props) {
 
       {/* Empty State - Start Searching */}
       {query.length < 2 && (
-        <div className="rounded-2xl border border-slate-200 bg-white px-8 py-16 text-center">
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-indigo-50">
-            <Sparkles className="h-10 w-10 text-indigo-600" strokeWidth={1.5} />
+        <div className="bg-white rounded-xl border border-gray-200 py-12 sm:py-16 text-center">
+          <div className="inline-flex p-3 bg-emerald-50 rounded-xl mb-4">
+            <Sparkles className="w-6 h-6 text-emerald-600" />
           </div>
-          <h3 className="mb-2 text-xl font-semibold text-slate-900">Search your workspace</h3>
-          <p className="mb-6 max-w-sm mx-auto text-sm text-slate-500">
+          <h3 className="text-base font-medium text-gray-900 mb-1">Search your workspace</h3>
+          <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
             Find playbooks, steps, and tools across your entire workspace. Start typing to search.
           </p>
-          <div className="flex items-center justify-center gap-4 text-sm text-slate-500">
-            <span className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4 text-indigo-500" />
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-gray-500">
+            <span className="flex items-center gap-1.5">
+              <BookOpen className="w-4 h-4 text-emerald-500" />
               Playbooks
             </span>
-            <span className="flex items-center gap-2">
-              <ListChecks className="h-4 w-4 text-emerald-500" />
+            <span className="flex items-center gap-1.5">
+              <ListChecks className="w-4 h-4 text-blue-500" />
               Steps
             </span>
-            <span className="flex items-center gap-2">
-              <Wrench className="h-4 w-4 text-purple-500" />
+            <span className="flex items-center gap-1.5">
+              <Wrench className="w-4 h-4 text-purple-500" />
               Tools
             </span>
           </div>
@@ -338,33 +358,52 @@ export function SearchClient({ workspaceId, playbooksCount }: Props) {
       {/* Recent Searches */}
       {query.length < 2 && recentSearches.length > 0 && (
         <div className="mt-8">
-          <div className="mb-4 flex items-center gap-2">
-            <History className="h-4 w-4 text-slate-400" strokeWidth={2} />
-            <h2 className="text-sm font-semibold text-slate-900">Recent Searches</h2>
+          <div className="flex items-center gap-2 mb-3">
+            <History className="w-4 h-4 text-gray-400" />
+            <h2 className="text-sm font-medium text-gray-700">Recent Searches</h2>
           </div>
           <div className="flex flex-wrap gap-2">
             {recentSearches.map((term) => (
               <div
                 key={term}
-                className="group flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 ring-1 ring-slate-200 transition-all hover:ring-slate-300"
+                className="group flex items-center gap-1 bg-white border border-gray-200 rounded-lg pl-3 pr-1 py-1.5 hover:border-emerald-200 transition-colors"
               >
                 <button
                   onClick={() => setQuery(term)}
-                  className="text-sm font-medium text-slate-700"
+                  className="text-xs font-medium text-gray-700 hover:text-emerald-600 transition-colors"
                 >
                   {term}
                 </button>
                 <button
                   onClick={() => clearRecentSearch(term)}
-                  className="rounded-md p-0.5 text-slate-400 opacity-0 transition-all hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100"
+                  className="p-1 rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
                 >
-                  <X className="h-3.5 w-3.5" strokeWidth={2} />
+                  <X className="w-3 h-3" />
                 </button>
               </div>
             ))}
           </div>
         </div>
       )}
-    </>
+
+      {/* Quick Tips */}
+      {query.length < 2 && (
+        <div className="mt-8 bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
+              <Hash className="w-4 h-4 text-emerald-600" />
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-gray-900 mb-1">Search Tips</h4>
+              <ul className="text-xs text-gray-600 space-y-1">
+                <li>• Search for playbook titles, step descriptions, or tool names</li>
+                <li>• Use specific keywords for better results</li>
+                <li>• Results are sorted by relevance</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

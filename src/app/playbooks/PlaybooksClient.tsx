@@ -2,433 +2,527 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import type { Playbook } from '@/lib/types/database'
-import { formatDistanceToNow } from '@/lib/utils/date'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
-  Search,
   Plus,
-  Clock,
-  Eye,
-  FileText,
-  LayoutGrid,
+  Search,
+  Grid,
   List,
-  ArrowUpRight,
+  X,
+  FileText,
+  Eye,
+  Clock,
+  ChevronRight,
   Filter,
-  SlidersHorizontal,
   ArrowUpDown,
-  ChevronDown,
-  Sparkles,
-  TrendingUp,
-  Calendar,
   FolderOpen,
-  BookOpen,
+  Tag,
+  MoreHorizontal,
+  Copy,
+  Archive,
+  Trash2,
+  Sparkles,
+  Check,
 } from 'lucide-react'
+import { formatDistanceToNow } from '@/lib/utils/date'
+import type { Playbook, PlaybookCategory } from '@/lib/types/database'
 
-type Props = {
+type PlaybooksClientProps = {
   playbooks: Playbook[]
   initialCategory: string
 }
 
-type SortOption = 'updated' | 'created' | 'title' | 'views'
-
-const categories = ['All', 'HR', 'Operations', 'Support', 'Finance', 'Marketing', 'Sales', 'Other']
-
-const sortOptions: { value: SortOption; label: string }[] = [
-  { value: 'updated', label: 'Last Updated' },
-  { value: 'created', label: 'Date Created' },
-  { value: 'title', label: 'Title (A-Z)' },
-  { value: 'views', label: 'Most Viewed' },
+const categories: { value: PlaybookCategory | 'All'; label: string }[] = [
+  { value: 'All', label: 'All Playbooks' },
+  { value: 'HR', label: 'HR' },
+  { value: 'Operations', label: 'Operations' },
+  { value: 'Support', label: 'Support' },
+  { value: 'Finance', label: 'Finance' },
+  { value: 'Marketing', label: 'Marketing' },
+  { value: 'Sales', label: 'Sales' },
+  { value: 'Other', label: 'Other' },
 ]
 
-export function PlaybooksClient({ playbooks, initialCategory }: Props) {
+export function PlaybooksClient({ playbooks, initialCategory }: PlaybooksClientProps) {
   const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory)
+  const searchParams = useSearchParams()
+  
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [sortBy, setSortBy] = useState<SortOption>('updated')
-  const [showSortDropdown, setShowSortDropdown] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory)
+  const [sortBy, setSortBy] = useState<'updated' | 'created' | 'views' | 'title'>('updated')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [showFilters, setShowFilters] = useState(false)
+  const [selectedPlaybooks, setSelectedPlaybooks] = useState<string[]>([])
+  const [showBulkActions, setShowBulkActions] = useState(false)
 
+  // Filter and sort playbooks
   const filteredPlaybooks = useMemo(() => {
-    let filtered = playbooks.filter((playbook) => {
-      const matchesSearch =
-        !searchQuery ||
-        playbook.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        playbook.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    let filtered = [...playbooks]
 
-      const matchesCategory =
-        selectedCategory === 'All' || playbook.category === selectedCategory
+    if (selectedCategory !== 'All') {
+      filtered = filtered.filter(pb => pb.category === selectedCategory)
+    }
 
-      return matchesSearch && matchesCategory
-    })
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(pb => 
+        pb.title.toLowerCase().includes(query) ||
+        pb.description?.toLowerCase().includes(query) ||
+        pb.category.toLowerCase().includes(query)
+      )
+    }
 
-    // Sort playbooks
     filtered.sort((a, b) => {
+      let comparison = 0
       switch (sortBy) {
         case 'updated':
-          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+          comparison = new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+          break
         case 'created':
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        case 'title':
-          return a.title.localeCompare(b.title)
+          comparison = new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          break
         case 'views':
-          return (b.view_count || 0) - (a.view_count || 0)
-        default:
-          return 0
+          comparison = (b.view_count || 0) - (a.view_count || 0)
+          break
+        case 'title':
+          comparison = a.title.localeCompare(b.title)
+          break
       }
+      return sortOrder === 'desc' ? comparison : -comparison
     })
 
     return filtered
-  }, [playbooks, searchQuery, selectedCategory, sortBy])
+  }, [playbooks, selectedCategory, searchQuery, sortBy, sortOrder])
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category)
-    if (category === 'All') {
-      router.push('/playbooks')
+    const params = new URLSearchParams(searchParams.toString())
+    if (category !== 'All') {
+      params.set('category', category)
     } else {
-      router.push(`/playbooks?category=${category}`)
+      params.delete('category')
+    }
+    router.push(`/playbooks?${params.toString()}`)
+  }
+
+  const toggleSelect = (id: string) => {
+    setSelectedPlaybooks(prev => {
+      const updatedSelection = prev.includes(id) 
+        ? prev.filter(p => p !== id)
+        : [...prev, id]
+      setShowBulkActions(updatedSelection.length > 0)
+      return updatedSelection
+    })
+  }
+
+  const selectAll = () => {
+    if (selectedPlaybooks.length === filteredPlaybooks.length) {
+      setSelectedPlaybooks([])
+      setShowBulkActions(false)
+    } else {
+      setSelectedPlaybooks(filteredPlaybooks.map(p => p.id))
+      setShowBulkActions(true)
     }
   }
 
-  // Stats
-  const totalViews = playbooks.reduce((sum, p) => sum + (p.view_count || 0), 0)
-  const categoryCounts = playbooks.reduce((acc, p) => {
-    acc[p.category] = (acc[p.category] || 0) + 1
-    return acc
-  }, {} as Record<string, number>)
+  const clearSelection = () => {
+    setSelectedPlaybooks([])
+    setShowBulkActions(false)
+  }
 
   return (
-    <>
-      {/* Stats Bar */}
-      <div className="mb-6 grid gap-4 sm:grid-cols-4">
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
-            <BookOpen className="h-5 w-5 text-indigo-600" strokeWidth={1.5} />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-slate-900">{playbooks.length}</p>
-            <p className="text-xs font-medium text-slate-500">Total Playbooks</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50">
-            <Eye className="h-5 w-5 text-amber-600" strokeWidth={1.5} />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-slate-900">{totalViews}</p>
-            <p className="text-xs font-medium text-slate-500">Total Views</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50">
-            <FolderOpen className="h-5 w-5 text-emerald-600" strokeWidth={1.5} />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-slate-900">{Object.keys(categoryCounts).length}</p>
-            <p className="text-xs font-medium text-slate-500">Categories Used</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50">
-            <TrendingUp className="h-5 w-5 text-purple-600" strokeWidth={1.5} />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-slate-900">{filteredPlaybooks.length}</p>
-            <p className="text-xs font-medium text-slate-500">Showing</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="mb-6 space-y-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+    <div className="space-y-6">
+      {/* Search and Actions Bar */}
+      <div className="flex flex-col gap-4">
+        {/* Top Row - Search and View Toggle */}
+        <div className="flex items-center gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" strokeWidth={2} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
+              placeholder="Search playbooks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search playbooks by title or description..."
-              className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-900 placeholder-slate-400 transition-all focus:border-indigo-300 focus:outline-none focus:ring-4 focus:ring-indigo-100"
+              className="w-full pl-9 pr-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
-          <div className="flex items-center gap-2">
-            {/* Sort Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setShowSortDropdown(!showSortDropdown)}
-                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50"
-              >
-                <ArrowUpDown className="h-4 w-4 text-slate-400" strokeWidth={2} />
-                <span className="hidden sm:inline">{sortOptions.find(o => o.value === sortBy)?.label}</span>
-                <ChevronDown className="h-4 w-4 text-slate-400" strokeWidth={2} />
-              </button>
-              {showSortDropdown && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setShowSortDropdown(false)} />
-                  <div className="absolute right-0 z-20 mt-2 w-48 rounded-xl border border-slate-200 bg-white py-2 shadow-lg">
-                    {sortOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => {
-                          setSortBy(option.value)
-                          setShowSortDropdown(false)
-                        }}
-                        className={`flex w-full items-center px-4 py-2 text-left text-sm transition-colors ${
-                          sortBy === option.value
-                            ? 'bg-indigo-50 text-indigo-700 font-medium'
-                            : 'text-slate-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
 
-            {/* View Mode Toggle */}
-            <div className="flex rounded-xl border border-slate-200 bg-white p-1">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`rounded-lg p-2.5 transition-colors ${
-                  viewMode === 'grid' ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:text-slate-600'
-                }`}
-              >
-                <LayoutGrid className="h-4 w-4" strokeWidth={2} />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`rounded-lg p-2.5 transition-colors ${
-                  viewMode === 'list' ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:text-slate-600'
-                }`}
-              >
-                <List className="h-4 w-4" strokeWidth={2} />
-              </button>
-            </div>
+          {/* Mobile Filter Button */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="sm:hidden flex items-center justify-center w-10 h-10 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 relative"
+          >
+            <Filter className="w-4 h-4 text-gray-600" />
+            {(selectedCategory !== 'All' || sortBy !== 'updated') && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500" />
+            )}
+          </button>
 
-            <Link
-              href="/playbooks/new"
-              className="hidden items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-700 hover:shadow-xl active:scale-[0.98] sm:inline-flex"
+          {/* Desktop View Toggle */}
+          <div className="hidden sm:flex items-center border border-gray-200 rounded-xl overflow-hidden">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2.5 transition-colors ${
+                viewMode === 'grid'
+                  ? 'bg-emerald-50 text-emerald-600'
+                  : 'bg-white text-gray-400 hover:text-gray-600'
+              }`}
             >
-              <Plus className="h-4 w-4" strokeWidth={2.5} />
-              New Playbook
-            </Link>
+              <Grid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2.5 transition-colors ${
+                viewMode === 'list'
+                  ? 'bg-emerald-50 text-emerald-600'
+                  : 'bg-white text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              <List className="w-4 h-4" />
+            </button>
           </div>
+
+          {/* Create Button */}
+          <Link
+            href="/playbooks/new"
+            className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20 whitespace-nowrap"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">New Playbook</span>
+            <span className="sm:hidden">New</span>
+          </Link>
         </div>
 
-        {/* Category Filter */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
-            <Filter className="h-4 w-4" strokeWidth={2} />
-            <span className="hidden sm:inline">Filter:</span>
+        {/* Filters Row - Expandable on Mobile */}
+        <div className={`${showFilters ? 'flex' : 'hidden sm:flex'} flex-col sm:flex-row gap-3`}>
+          {/* Category Filter */}
+          <div className="relative flex-1 sm:max-w-xs">
+            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <select
+              value={selectedCategory}
+              onChange={(e) => handleCategoryChange(e.target.value)}
+              className="w-full pl-9 pr-8 py-2.5 text-sm bg-white border border-gray-200 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              {categories.map(cat => (
+                <option key={cat.value} value={cat.value}>{cat.label}</option>
+              ))}
+            </select>
+            <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 rotate-90" />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => handleCategoryChange(category)}
-                className={`whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-                  selectedCategory === category
-                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-                    : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50 hover:ring-slate-300'
-                }`}
+
+          {/* Sort Controls */}
+          <div className="flex gap-2">
+            <div className="relative flex-1 sm:w-40">
+              <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="w-full pl-9 pr-8 py-2.5 text-sm bg-white border border-gray-200 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
-                {category}
-                {category !== 'All' && categoryCounts[category] && (
-                  <span className={`ml-1.5 ${selectedCategory === category ? 'text-indigo-200' : 'text-slate-400'}`}>
-                    ({categoryCounts[category]})
-                  </span>
-                )}
-              </button>
-            ))}
+                <option value="updated">Last updated</option>
+                <option value="created">Date created</option>
+                <option value="views">Most viewed</option>
+                <option value="title">Title</option>
+              </select>
+            </div>
+            <button
+              onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+              className="px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors"
+              title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+            >
+              <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrder === 'asc' ? 'rotate-180' : ''}`} />
+            </button>
           </div>
+
+          {/* Clear Filters Button */}
+          {(selectedCategory !== 'All' || searchQuery) && (
+            <button
+              onClick={() => {
+                setSelectedCategory('All')
+                setSearchQuery('')
+                handleCategoryChange('All')
+                setShowFilters(false)
+              }}
+              className="sm:hidden flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-emerald-600 bg-emerald-50 rounded-xl"
+            >
+              <X className="w-4 h-4" />
+              Clear filters
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Results Info */}
-      <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm text-slate-500">
-          Showing <span className="font-medium text-slate-900">{filteredPlaybooks.length}</span>
-          {filteredPlaybooks.length !== playbooks.length && (
-            <span> of <span className="font-medium text-slate-900">{playbooks.length}</span></span>
-          )}
-          {' '}{filteredPlaybooks.length === 1 ? 'playbook' : 'playbooks'}
-          {selectedCategory !== 'All' && <span> in <span className="font-medium text-slate-900">{selectedCategory}</span></span>}
+      {/* Bulk Actions Bar */}
+      {showBulkActions && (
+        <div className="fixed bottom-20 left-0 right-0 sm:bottom-6 sm:left-auto sm:right-6 z-50 mx-4 sm:mx-0 animate-slide-up">
+          <div className="bg-gray-900 text-white rounded-xl shadow-2xl p-3 flex items-center justify-between sm:min-w-[400px]">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium">
+                {selectedPlaybooks.length} selected
+              </span>
+              <button
+                onClick={clearSelection}
+                className="text-xs text-gray-400 hover:text-white"
+              >
+                Clear
+              </button>
+            </div>
+            <div className="flex items-center gap-1">
+              <button className="p-2 hover:bg-gray-800 rounded-lg transition-colors" title="Copy">
+                <Copy className="w-4 h-4" />
+              </button>
+              <button className="p-2 hover:bg-gray-800 rounded-lg transition-colors" title="Archive">
+                <Archive className="w-4 h-4" />
+              </button>
+              <button className="p-2 hover:bg-red-600/20 text-red-400 rounded-lg transition-colors" title="Delete">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Results Header */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-gray-500">
+          {filteredPlaybooks.length} playbook{filteredPlaybooks.length !== 1 ? 's' : ''}
         </p>
-        {searchQuery && (
+        {filteredPlaybooks.length > 0 && (
           <button
-            onClick={() => setSearchQuery('')}
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+            onClick={selectAll}
+            className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
           >
-            Clear search
+            {selectedPlaybooks.length === filteredPlaybooks.length ? 'Deselect all' : 'Select all'}
           </button>
         )}
       </div>
 
-      {/* Grid View */}
-      {viewMode === 'grid' && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredPlaybooks.map((playbook) => (
-            <Link
-              key={playbook.id}
-              href={`/playbooks/${playbook.id}`}
-              className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:border-slate-300 hover:shadow-lg"
-            >
-              <div className="mb-4 flex items-start justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 transition-colors group-hover:bg-indigo-50">
-                  <FileText className="h-6 w-6 text-slate-500 transition-colors group-hover:text-indigo-600" strokeWidth={1.5} />
-                </div>
-                <span className={`rounded-lg px-3 py-1 text-xs font-semibold ${getCategoryStyle(playbook.category)}`}>
-                  {playbook.category}
-                </span>
-              </div>
-              <h3 className="mb-2 text-base font-semibold text-slate-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">
-                {playbook.title}
-              </h3>
-              <p className="mb-4 text-sm text-slate-500 line-clamp-2 min-h-[40px]">
-                {playbook.description || 'No description provided'}
-              </p>
-              <div className="flex items-center justify-between border-t border-slate-100 pt-4 text-xs text-slate-400">
-                <span className="flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5" strokeWidth={2} />
-                  {formatDistanceToNow(playbook.updated_at)}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Eye className="h-3.5 w-3.5" strokeWidth={2} />
-                  {playbook.view_count || 0} views
-                </span>
-              </div>
-              <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 transition-opacity group-hover:opacity-100" />
-            </Link>
-          ))}
-
-          {/* Create New Card */}
-          <Link
-            href="/playbooks/new"
-            className="group flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-8 transition-all hover:border-indigo-300 hover:bg-indigo-50/50"
-          >
-            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-slate-400 shadow-sm transition-all group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-indigo-500/20 group-hover:scale-105">
-              <Plus className="h-7 w-7" strokeWidth={2} />
-            </div>
-            <p className="text-base font-semibold text-slate-700">Create Playbook</p>
-            <p className="text-sm text-slate-400">Start from scratch</p>
-          </Link>
-        </div>
-      )}
-
-      {/* List View */}
-      {viewMode === 'list' && (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          {/* Table Header */}
-          <div className="hidden sm:grid sm:grid-cols-12 border-b border-slate-100 bg-slate-50/50 px-6 py-3">
-            <div className="col-span-5 text-xs font-semibold uppercase tracking-wider text-slate-500">Playbook</div>
-            <div className="col-span-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Category</div>
-            <div className="col-span-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Updated</div>
-            <div className="col-span-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Views</div>
-            <div className="col-span-1"></div>
-          </div>
-          {filteredPlaybooks.map((playbook, index) => (
-            <Link
-              key={playbook.id}
-              href={`/playbooks/${playbook.id}`}
-              className={`group flex sm:grid sm:grid-cols-12 items-center gap-4 px-6 py-4 transition-colors hover:bg-slate-50 ${
-                index !== filteredPlaybooks.length - 1 ? 'border-b border-slate-100' : ''
-              }`}
-            >
-              <div className="col-span-5 flex items-center gap-4 min-w-0">
-                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 transition-colors group-hover:bg-indigo-50">
-                  <FileText className="h-5 w-5 text-slate-500 transition-colors group-hover:text-indigo-600" strokeWidth={1.5} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-slate-900 group-hover:text-indigo-600 transition-colors">{playbook.title}</p>
-                  <p className="truncate text-sm text-slate-500">{playbook.description || 'No description'}</p>
-                </div>
-              </div>
-              <div className="col-span-2 hidden sm:block">
-                <span className={`inline-flex rounded-lg px-3 py-1 text-xs font-semibold ${getCategoryStyle(playbook.category)}`}>
-                  {playbook.category}
-                </span>
-              </div>
-              <div className="col-span-2 hidden sm:flex items-center gap-1.5 text-sm text-slate-500">
-                <Calendar className="h-4 w-4 text-slate-400" strokeWidth={1.5} />
-                {formatDistanceToNow(playbook.updated_at)}
-              </div>
-              <div className="col-span-2 hidden sm:flex items-center gap-1.5 text-sm text-slate-500">
-                <Eye className="h-4 w-4 text-slate-400" strokeWidth={1.5} />
-                {playbook.view_count || 0}
-              </div>
-              <div className="col-span-1 flex justify-end">
-                <ArrowUpRight className="h-5 w-5 text-slate-300 opacity-0 transition-all group-hover:opacity-100 group-hover:text-indigo-500" strokeWidth={2} />
-              </div>
-            </Link>
-          ))}
-
-          <Link
-            href="/playbooks/new"
-            className="flex items-center gap-4 border-t border-slate-100 px-6 py-4 transition-colors hover:bg-indigo-50/50"
-          >
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl border-2 border-dashed border-slate-200 text-slate-400 group-hover:border-indigo-300 group-hover:text-indigo-500">
-              <Plus className="h-5 w-5" strokeWidth={2} />
-            </div>
-            <div>
-              <p className="font-medium text-slate-600">Create New Playbook</p>
-              <p className="text-sm text-slate-400">Document a new process</p>
-            </div>
-          </Link>
-        </div>
-      )}
-
       {/* Empty State */}
       {filteredPlaybooks.length === 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white px-8 py-16 text-center">
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-100">
-            {searchQuery ? (
-              <Search className="h-10 w-10 text-slate-400" strokeWidth={1.5} />
-            ) : (
-              <BookOpen className="h-10 w-10 text-slate-400" strokeWidth={1.5} />
-            )}
+        <div className="text-center py-12 sm:py-16 bg-white rounded-xl border border-gray-200">
+          <div className="inline-flex p-3 bg-gray-100 rounded-xl mb-4">
+            <FolderOpen className="w-6 h-6 text-gray-400" />
           </div>
-          <h3 className="mb-2 text-xl font-semibold text-slate-900">
-            {searchQuery ? 'No playbooks found' : 'No playbooks yet'}
-          </h3>
-          <p className="mb-6 text-sm text-slate-500 max-w-sm mx-auto">
-            {searchQuery
-              ? 'Try adjusting your search terms or clearing the filter to see more results'
-              : 'Get started by creating your first playbook to document your processes and workflows'}
+          <h3 className="text-base font-medium text-gray-900 mb-1">No playbooks found</h3>
+          <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
+            {searchQuery || selectedCategory !== 'All'
+              ? 'Try adjusting your filters or search query'
+              : 'Get started by creating your first playbook'}
           </p>
-          <div className="flex items-center justify-center gap-3">
-            {searchQuery && (
-              <button
-                onClick={() => {
-                  setSearchQuery('')
-                  setSelectedCategory('All')
-                }}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50"
-              >
-                Clear Filters
-              </button>
-            )}
+          {!searchQuery && selectedCategory === 'All' && (
             <Link
               href="/playbooks/new"
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-700"
+              className="inline-flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors"
             >
-              <Plus className="h-4 w-4" strokeWidth={2.5} />
+              <Plus className="w-4 h-4" />
               Create Playbook
             </Link>
-          </div>
+          )}
         </div>
       )}
 
-      {/* Mobile FAB */}
-      <Link
-        href="/playbooks/new"
-        className="fixed bottom-20 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-105 hover:shadow-xl active:scale-95 sm:hidden"
-      >
-        <Plus className="h-6 w-6" strokeWidth={2.5} />
-      </Link>
-    </>
+      {/* Playbooks Display */}
+      {filteredPlaybooks.length > 0 && (
+        <>
+          {/* Mobile Grid View */}
+          <div className="sm:hidden space-y-3">
+            {filteredPlaybooks.map((playbook) => (
+              <div
+                key={playbook.id}
+                className={`bg-white border rounded-xl p-4 transition-all ${
+                  selectedPlaybooks.includes(playbook.id)
+                    ? 'border-emerald-500 ring-2 ring-emerald-500/20'
+                    : 'border-gray-200 hover:border-emerald-200 hover:shadow-md'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={selectedPlaybooks.includes(playbook.id)}
+                      onChange={() => toggleSelect(playbook.id)}
+                      className="absolute -left-1 -top-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center ml-4">
+                      <FileText className="w-6 h-6 text-gray-500" />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="font-medium text-gray-900">{playbook.title}</h3>
+                        <span className={`inline-block text-xs px-2 py-0.5 rounded-full mt-1 ${getCategoryStyle(playbook.category)}`}>
+                          {playbook.category}
+                        </span>
+                      </div>
+                      <Link
+                        href={`/playbooks/${playbook.id}`}
+                        className="text-emerald-600 hover:text-emerald-700"
+                      >
+                        <ChevronRight className="w-5 h-5" />
+                      </Link>
+                    </div>
+                    {playbook.description && (
+                      <p className="text-xs text-gray-500 mt-2 line-clamp-2">{playbook.description}</p>
+                    )}
+                    <div className="flex items-center gap-3 mt-3 text-xs text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <Eye className="w-3 h-3" />
+                        {playbook.view_count || 0}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {formatDistanceToNow(playbook.updated_at)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Views */}
+          <div className="hidden sm:block">
+            {viewMode === 'grid' ? (
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredPlaybooks.map((playbook) => (
+                  <div
+                    key={playbook.id}
+                    className={`group relative bg-white border rounded-xl p-5 transition-all ${
+                      selectedPlaybooks.includes(playbook.id)
+                        ? 'border-emerald-500 ring-2 ring-emerald-500/20'
+                        : 'border-gray-200 hover:border-emerald-200 hover:shadow-md'
+                    }`}
+                  >
+                    <div className="absolute top-4 left-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedPlaybooks.includes(playbook.id)}
+                        onChange={() => toggleSelect(playbook.id)}
+                        className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                      />
+                    </div>
+                    
+                    <Link href={`/playbooks/${playbook.id}`} className="block">
+                      <div className="flex flex-col items-center text-center">
+                        <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center mb-4 group-hover:bg-emerald-50 transition-colors">
+                          <FileText className="w-8 h-8 text-gray-500 group-hover:text-emerald-600 transition-colors" />
+                        </div>
+                        <h3 className="font-medium text-gray-900 truncate w-full mb-1">
+                          {playbook.title}
+                        </h3>
+                        <span className={`text-xs px-2 py-0.5 rounded-full mb-2 ${getCategoryStyle(playbook.category)}`}>
+                          {playbook.category}
+                        </span>
+                        {playbook.description && (
+                          <p className="text-xs text-gray-500 line-clamp-2 mb-3">
+                            {playbook.description}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-center gap-3 text-xs text-gray-400">
+                          <span className="flex items-center gap-1">
+                            <Eye className="w-3 h-3" />
+                            {playbook.view_count || 0}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {formatDistanceToNow(playbook.updated_at)}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="w-10 px-4 py-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedPlaybooks.length === filteredPlaybooks.length && filteredPlaybooks.length > 0}
+                          onChange={selectAll}
+                          className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                        />
+                      </th>
+                      <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-4 py-3">
+                        Title
+                      </th>
+                      <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-4 py-3">
+                        Category
+                      </th>
+                      <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-4 py-3">
+                        Views
+                      </th>
+                      <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-4 py-3">
+                        Last updated
+                      </th>
+                      <th className="w-10 px-4 py-3"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredPlaybooks.map((playbook) => (
+                      <tr
+                        key={playbook.id}
+                        className={`hover:bg-gray-50 transition-colors ${
+                          selectedPlaybooks.includes(playbook.id) ? 'bg-emerald-50/50' : ''
+                        }`}
+                      >
+                        <td className="px-4 py-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedPlaybooks.includes(playbook.id)}
+                            onChange={() => toggleSelect(playbook.id)}
+                            className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <Link href={`/playbooks/${playbook.id}`} className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                              <FileText className="w-4 h-4 text-gray-500" />
+                            </div>
+                            <span className="font-medium text-gray-900 hover:text-emerald-600 transition-colors">
+                              {playbook.title}
+                            </span>
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs px-2 py-1 rounded-full ${getCategoryStyle(playbook.category)}`}>
+                            {playbook.category}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-500">
+                          {playbook.view_count || 0}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-500">
+                          {formatDistanceToNow(playbook.updated_at)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <button className="text-gray-400 hover:text-gray-600">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
   )
 }
 
@@ -440,7 +534,7 @@ function getCategoryStyle(category: string) {
     Finance: 'bg-amber-50 text-amber-700',
     Marketing: 'bg-pink-50 text-pink-700',
     Sales: 'bg-cyan-50 text-cyan-700',
-    Other: 'bg-slate-100 text-slate-700',
+    Other: 'bg-gray-100 text-gray-700',
   }
   return styles[category] || styles.Other
 }
