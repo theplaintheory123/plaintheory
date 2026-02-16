@@ -374,8 +374,8 @@ export default function DashboardLayout({ children, user }: DashboardLayoutProps
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl px-4 pb-24 pt-20 sm:px-6 lg:px-8 lg:pb-8 lg:pt-8">
+      <main className="flex-1 overflow-y-auto bg-slate-50">
+        <div className="mx-auto max-w-6xl px-4 pb-24 pt-20 sm:px-6 lg:px-8 lg:pb-12 lg:pt-8">
           {children}
         </div>
       </main>
