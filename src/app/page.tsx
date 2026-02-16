@@ -10,9 +10,10 @@ import Image from "next/image";
 // ==============================================
 
 interface Feature {
-  icon: string;
+  icon: React.ReactNode;
   title: string;
   description: string;
+  color: string;
 }
 
 interface Stat {
@@ -25,6 +26,7 @@ interface Testimonial {
   author: string;
   role: string;
   company: string;
+  avatar: string;
 }
 
 interface FlowStep {
@@ -34,25 +36,81 @@ interface FlowStep {
   icon: string;
 }
 
+interface FooterLink {
+  label: string;
+  href: string;
+}
+
+interface FooterSection {
+  title: string;
+  links: FooterLink[];
+}
+
 // ==============================================
 // Data
 // ==============================================
 
 const features: Feature[] = [
   {
-    icon: "📋",
-    title: "Document",
-    description: "Create and organize all your business processes, policies, and procedures in one centralized hub."
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2-10H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V8a2 2 0 00-2-2z" />
+      </svg>
+    ),
+    title: "Document Processes",
+    description: "Create comprehensive documentation for every business process, policy, and procedure in one centralized hub.",
+    color: "emerald"
   },
   {
-    icon: "📊",
-    title: "Organize",
-    description: "Structure your operations with intuitive categories, tags, and custom workflows that make sense."
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+      </svg>
+    ),
+    title: "Organize Workflows",
+    description: "Structure your operations with intuitive categories, tags, and custom workflows that mirror how your business works.",
+    color: "blue"
   },
   {
-    icon: "⚡",
-    title: "Run",
-    description: "Execute daily tasks, track progress, and keep your business running smoothly from one dashboard."
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+    title: "Run Operations",
+    description: "Execute daily tasks, track progress in real-time, and keep your business running smoothly from one dashboard.",
+    color: "purple"
+  },
+  {
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+    ),
+    title: "Collaborate",
+    description: "Work together seamlessly with real-time updates, comments, and notifications for your entire team.",
+    color: "amber"
+  },
+  {
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    ),
+    title: "Analytics",
+    description: "Make data-driven decisions with powerful insights into your team's performance and operational efficiency.",
+    color: "pink"
+  },
+  {
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+      </svg>
+    ),
+    title: "Enterprise Security",
+    description: "Bank-level encryption and security protocols to keep your business data safe and protected at all times.",
+    color: "indigo"
   }
 ];
 
@@ -68,19 +126,22 @@ const testimonials: Testimonial[] = [
     quote: "Plantheory transformed how we document and run our operations. It's the single source of truth we've always needed.",
     author: "Sarah Chen",
     role: "COO",
-    company: "TechFlow"
+    company: "TechFlow",
+    avatar: "SC"
   },
   {
     quote: "Finally, a platform that understands how businesses actually operate. Our team is more aligned than ever.",
     author: "Marcus Rodriguez",
     role: "Director of Operations",
-    company: "InnovateCorp"
+    company: "InnovateCorp",
+    avatar: "MR"
   },
   {
     quote: "The clarity and organization Plantheory brings to our daily operations is invaluable. It just works.",
     author: "Emma Watson",
     role: "Operations Lead",
-    company: "ScaleUp"
+    company: "ScaleUp",
+    avatar: "EW"
   }
 ];
 
@@ -108,6 +169,42 @@ const flowSteps: FlowStep[] = [
     title: "Iterate & Improve",
     description: "Identify bottlenecks, optimize workflows, and scale your operations with data-driven insights.",
     icon: "🔄"
+  }
+];
+
+const footerSections: FooterSection[] = [
+  {
+    title: "Product",
+    links: [
+      { label: "Features", href: "#features" },
+      { label: "How it works", href: "#how-it-works" },
+      { label: "What we do", href: "#what-we-do" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Integrations", href: "/integrations" },
+      { label: "Changelog", href: "/changelog" }
+    ]
+  },
+  {
+    title: "Resources",
+    links: [
+      { label: "Documentation", href: "/docs" },
+      { label: "Guides", href: "/guides" },
+      { label: "API Reference", href: "/api" },
+      { label: "Support", href: "/support" },
+      { label: "Blog", href: "/blog" },
+      { label: "Community", href: "/community" }
+    ]
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "About", href: "/about" },
+      { label: "Careers", href: "/careers" },
+      { label: "Contact", href: "/contact" },
+      { label: "Privacy", href: "/privacy" },
+      { label: "Terms", href: "/terms" },
+      { label: "Cookies", href: "/cookies" }
+    ]
   }
 ];
 
@@ -144,7 +241,6 @@ const SectionHeader: React.FC<{
 
 const GeometricBackground: React.FC = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {/* Grid Pattern - responsive grid size */}
     <div 
       className="absolute inset-0 opacity-30 md:opacity-100" 
       style={{
@@ -152,11 +248,10 @@ const GeometricBackground: React.FC = () => (
           linear-gradient(to right, #e5e7eb 1px, transparent 1px),
           linear-gradient(to bottom, #e5e7eb 1px, transparent 1px)
         `,
-        backgroundSize: '2rem 2rem md:4rem 4rem'
+        backgroundSize: '2rem 2rem'
       }}
     />
     
-    {/* Diagonal Lines - hide on mobile */}
     <div className="hidden md:block absolute inset-0 opacity-30">
       <div className="absolute top-0 left-0 w-full h-full" 
         style={{
@@ -171,7 +266,6 @@ const GeometricBackground: React.FC = () => (
       />
     </div>
     
-    {/* Geometric Shapes - adjusted for mobile */}
     <svg className="absolute top-0 right-0 w-48 h-48 md:w-96 md:h-96 text-gray-200 opacity-30 md:opacity-100" viewBox="0 0 100 100" preserveAspectRatio="none">
       <polygon points="0,0 100,0 50,50" fill="currentColor" />
       <circle cx="75" cy="75" r="25" fill="currentColor" className="opacity-50" />
@@ -187,6 +281,15 @@ const GeometricBackground: React.FC = () => (
 const FeatureCard: React.FC<{ feature: Feature; index: number }> = ({ feature, index }) => {
   const ref = React.useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
+  
+  const colorClasses = {
+    emerald: 'bg-emerald-50 text-emerald-600 border-emerald-200 group-hover:bg-emerald-100',
+    blue: 'bg-blue-50 text-blue-600 border-blue-200 group-hover:bg-blue-100',
+    purple: 'bg-purple-50 text-purple-600 border-purple-200 group-hover:bg-purple-100',
+    amber: 'bg-amber-50 text-amber-600 border-amber-200 group-hover:bg-amber-100',
+    pink: 'bg-pink-50 text-pink-600 border-pink-200 group-hover:bg-pink-100',
+    indigo: 'bg-indigo-50 text-indigo-600 border-indigo-200 group-hover:bg-indigo-100',
+  }[feature.color];
 
   return (
     <motion.div
@@ -194,19 +297,18 @@ const FeatureCard: React.FC<{ feature: Feature; index: number }> = ({ feature, i
       initial={{ opacity: 0, y: 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="relative bg-white rounded-xl md:rounded-2xl p-6 md:p-8 border border-gray-200 shadow-sm hover:shadow-md transition-all"
+      className="group relative bg-white rounded-2xl p-6 border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all"
     >
-      {/* Geometric accent */}
-      <div className="absolute top-0 right-0 w-12 h-12 md:w-16 md:h-16 overflow-hidden">
-        <div className="absolute top-0 right-0 w-6 h-6 md:w-8 md:h-8 bg-emerald-100 rounded-bl-xl md:rounded-bl-2xl" />
+      {/* Icon */}
+      <div className={`w-12 h-12 rounded-xl ${colorClasses} flex items-center justify-center mb-4 transition-colors`}>
+        {feature.icon}
       </div>
       
-      <div className="text-3xl md:text-4xl mb-3 md:mb-4">{feature.icon}</div>
-      <h3 className="text-xl md:text-2xl font-medium text-gray-900 mb-2 md:mb-3">{feature.title}</h3>
-      <p className="text-sm md:text-base text-gray-500 leading-relaxed">{feature.description}</p>
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
+      <p className="text-sm text-gray-500 leading-relaxed">{feature.description}</p>
       
-      {/* Bottom accent line */}
-      <div className="absolute bottom-0 left-4 md:left-8 right-4 md:right-8 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+      {/* Hover effect */}
+      <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
     </motion.div>
   );
 };
@@ -239,17 +341,22 @@ const TestimonialCard: React.FC<{ testimonial: Testimonial; index: number }> = (
       initial={{ opacity: 0, y: 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: index * 0.15 }}
-      className="relative bg-gray-50 rounded-xl md:rounded-2xl p-6 md:p-8 border border-gray-200 h-full"
+      className="relative bg-white rounded-2xl p-6 border border-gray-200 hover:border-emerald-200 transition-all"
     >
       {/* Quote mark */}
-      <div className="absolute top-4 right-4 md:top-6 md:right-6 text-4xl md:text-6xl text-gray-300 font-serif">"</div>
+      <div className="absolute top-4 right-4 text-4xl text-gray-200 font-serif">"</div>
       
-      <p className="text-sm md:text-base lg:text-lg text-gray-700 mb-4 md:mb-6 relative z-10">{testimonial.quote}</p>
+      <p className="text-sm text-gray-600 mb-6 relative z-10">{testimonial.quote}</p>
       
-      <div className="border-t border-gray-200 pt-3 md:pt-4">
-        <div className="font-medium text-gray-900 text-sm md:text-base">{testimonial.author}</div>
-        <div className="text-xs md:text-sm text-gray-500">
-          {testimonial.role}, {testimonial.company}
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-sm font-medium text-white">
+          {testimonial.avatar}
+        </div>
+        <div>
+          <div className="font-medium text-gray-900 text-sm">{testimonial.author}</div>
+          <div className="text-xs text-gray-500">
+            {testimonial.role}, {testimonial.company}
+          </div>
         </div>
       </div>
     </motion.div>
@@ -263,36 +370,22 @@ const FlowStepCard: React.FC<{ step: FlowStep; index: number }> = ({ step, index
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-      animate={isInView ? { opacity: 1, x: 0 } : {}}
+      initial={{ opacity: 0, y: 20 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: index * 0.15 }}
-      className="relative flex flex-col sm:flex-row gap-4 sm:gap-6 items-start p-4 sm:p-6 bg-white rounded-xl border border-gray-200 hover:border-emerald-200 transition-colors"
+      className="relative flex gap-4 items-start p-6 bg-white rounded-xl border border-gray-200 hover:border-emerald-200 transition-all"
     >
-      {/* Number badge */}
-      <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-emerald-50 rounded-xl flex items-center justify-center">
-        <span className="text-emerald-600 font-light text-xl sm:text-2xl">{step.number}</span>
+      <div className="flex-shrink-0 w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
+        <span className="text-emerald-600 font-light text-xl">{step.number}</span>
       </div>
       
-      {/* Icon */}
-      <div className="text-2xl sm:text-3xl md:hidden">{step.icon}</div>
-      
-      {/* Content */}
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-2">
-          <div className="hidden md:block text-2xl mr-2">{step.icon}</div>
-          <h3 className="text-lg sm:text-xl font-medium text-gray-900">{step.title}</h3>
+          <span className="text-2xl">{step.icon}</span>
+          <h3 className="text-lg font-medium text-gray-900">{step.title}</h3>
         </div>
-        <p className="text-sm sm:text-base text-gray-500 leading-relaxed">{step.description}</p>
+        <p className="text-sm text-gray-500 leading-relaxed">{step.description}</p>
       </div>
-      
-      {/* Connection line (except last) */}
-      {index < flowSteps.length - 1 && (
-        <div className="hidden lg:block absolute -bottom-8 left-1/2 transform -translate-x-1/2">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-gray-300">
-            <path d="M12 4v16M12 20l-4-4M12 20l4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </div>
-      )}
     </motion.div>
   );
 };
@@ -307,39 +400,48 @@ const Navigation: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+    const element = document.querySelector(href);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled ? "bg-white/90 backdrop-blur-md border-b border-gray-200 py-3 sm:py-4" : "bg-transparent py-4 sm:py-6"
+      scrolled ? "bg-white/90 backdrop-blur-md border-b border-gray-200 py-3" : "bg-transparent py-4"
     }`}>
       <Container>
         <div className="flex items-center justify-between">
           <Link href="/" className="relative z-10">
-            <Image src="/logo-text.svg" width={120} height={32} alt="Plantheory" className="sm:w-[150px]" />
+            <Image src="/logo-text.svg" width={120} height={32} alt="Plantheory" />
           </Link>
           
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
-            <Link href="#features" className="text-sm lg:text-base text-gray-500 hover:text-gray-900 transition-colors">
+          <div className="hidden md:flex items-center space-x-6">
+            <Link href="#features" onClick={(e) => scrollToSection(e, '#features')} className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
               Features
             </Link>
-            <Link href="#how-it-works" className="text-sm lg:text-base text-gray-500 hover:text-gray-900 transition-colors">
+            <Link href="#how-it-works" onClick={(e) => scrollToSection(e, '#how-it-works')} className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
               How it works
             </Link>
-            <Link href="#what-we-do" className="text-sm lg:text-base text-gray-500 hover:text-gray-900 transition-colors">
+            <Link href="#what-we-do" onClick={(e) => scrollToSection(e, '#what-we-do')} className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
               What we do
             </Link>
-            <Link href="#testimonials" className="text-sm lg:text-base text-gray-500 hover:text-gray-900 transition-colors">
+            <Link href="#testimonials" onClick={(e) => scrollToSection(e, '#testimonials')} className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
               Testimonials
             </Link>
             <Link
               href="/auth/login"
-              className="text-sm lg:text-base text-gray-900 font-medium hover:text-emerald-600 transition-colors"
+              className="text-sm text-gray-900 font-medium hover:text-emerald-600 transition-colors"
             >
               Log in
             </Link>
             <Link
               href="/auth/signup"
-              className="px-4 lg:px-5 py-2 bg-gray-900 text-white rounded-lg text-sm lg:text-base font-medium hover:bg-gray-800 transition-colors"
+              className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
             >
               Sign up
             </Link>
@@ -365,29 +467,29 @@ const Navigation: React.FC = () => {
             <div className="flex flex-col space-y-4">
               <Link 
                 href="#features" 
+                onClick={(e) => scrollToSection(e, '#features')}
                 className="text-gray-600 hover:text-gray-900 py-2"
-                onClick={() => setMobileMenuOpen(false)}
               >
                 Features
               </Link>
               <Link 
                 href="#how-it-works" 
+                onClick={(e) => scrollToSection(e, '#how-it-works')}
                 className="text-gray-600 hover:text-gray-900 py-2"
-                onClick={() => setMobileMenuOpen(false)}
               >
                 How it works
               </Link>
               <Link 
                 href="#what-we-do" 
+                onClick={(e) => scrollToSection(e, '#what-we-do')}
                 className="text-gray-600 hover:text-gray-900 py-2"
-                onClick={() => setMobileMenuOpen(false)}
               >
                 What we do
               </Link>
               <Link 
                 href="#testimonials" 
+                onClick={(e) => scrollToSection(e, '#testimonials')}
                 className="text-gray-600 hover:text-gray-900 py-2"
-                onClick={() => setMobileMenuOpen(false)}
               >
                 Testimonials
               </Link>
@@ -426,7 +528,7 @@ export default function Home() {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="relative pt-24 sm:pt-28 md:pt-32 lg:pt-40 pb-16 sm:pb-20 md:pb-24 lg:pb-32 overflow-hidden">
+      <section className="relative pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden">
         <Container>
           <div className="max-w-4xl mx-auto text-center">
             <motion.div
@@ -434,7 +536,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light tracking-tight text-gray-900 mb-4 sm:mb-6 px-4">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light tracking-tight text-gray-900 mb-6">
                 Your business's{' '}
                 <span className="font-medium text-gray-900 relative">
                   single source of truth
@@ -444,35 +546,32 @@ export default function Home() {
                 </span>
               </h1>
               
-              <p className="text-base sm:text-lg md:text-xl text-gray-500 mb-6 sm:mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed px-4">
+              <p className="text-lg sm:text-xl text-gray-500 mb-8 max-w-2xl mx-auto leading-relaxed">
                 Document, organize, and run your daily operations from one place. 
-                Plantheory is the modern platform that brings clarity to how your business works.
+                Plantheory brings clarity to how your business works.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/auth/signup"
-                  className="px-6 sm:px-8 py-3 sm:py-4 bg-gray-900 text-white rounded-xl text-sm sm:text-base font-medium hover:bg-gray-800 transition-colors"
+                  className="px-8 py-4 bg-gray-900 text-white rounded-xl text-base font-medium hover:bg-gray-800 transition-colors"
                 >
                   Start free trial
                 </Link>
                 <Link
                   href="#what-we-do"
-                  className="px-6 sm:px-8 py-3 sm:py-4 border border-gray-300 text-gray-700 rounded-xl text-sm sm:text-base font-medium hover:border-gray-400 hover:text-gray-900 transition-colors"
+                  className="px-8 py-4 border border-gray-300 text-gray-700 rounded-xl text-base font-medium hover:border-gray-400 hover:text-gray-900 transition-colors"
                 >
                   See what we do →
                 </Link>
               </div>
-              
-              {/* Geometric accent */}
-              <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-px h-8 sm:h-12 bg-gradient-to-b from-gray-300 to-transparent" />
             </motion.div>
           </div>
         </Container>
       </section>
 
-      {/* What We Do Section - NEW FLOW */}
-      <section id="what-we-do" className="relative py-16 sm:py-20 md:py-24 lg:py-32 bg-gray-50/50">
+      {/* What We Do Section */}
+      <section id="what-we-do" className="relative py-20 md:py-32 bg-gray-50">
         <Container>
           <SectionHeader
             title="What we do"
@@ -480,29 +579,24 @@ export default function Home() {
             align="center"
           />
           
-          <div className="relative max-w-4xl mx-auto">
-            {/* Connection line for desktop */}
-            <div className="hidden lg:block absolute top-24 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-              {flowSteps.map((step, index) => (
-                <FlowStepCard key={step.number} step={step} index={index} />
-              ))}
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {flowSteps.map((step, index) => (
+              <FlowStepCard key={step.number} step={step} index={index} />
+            ))}
           </div>
         </Container>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="relative py-16 sm:py-20 md:py-24 lg:py-32">
+      {/* Features Section - Improved */}
+      <section id="features" className="relative py-20 md:py-32">
         <Container>
           <SectionHeader
             title="Everything you need to run your business"
-            description="One platform. Three core capabilities. Complete control over your operations."
+            description="One platform. Six powerful capabilities. Complete control over your operations."
             align="center"
           />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, index) => (
               <FeatureCard key={feature.title} feature={feature} index={index} />
             ))}
@@ -511,9 +605,9 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="relative py-12 sm:py-16 md:py-20 border-y border-gray-200">
+      <section className="relative py-16 border-y border-gray-200">
         <Container>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <StatCard key={stat.label} stat={stat} index={index} />
             ))}
@@ -522,22 +616,21 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="relative py-16 sm:py-20 md:py-24 lg:py-32">
+      <section id="how-it-works" className="relative py-20 md:py-32">
         <Container>
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="px-4 lg:px-0"
             >
               <SectionHeader
                 title="From chaos to clarity in three steps"
                 description="Plantheory helps you transform scattered processes into a well-organized operating system."
               />
               
-              <div className="space-y-6 sm:space-y-8">
+              <div className="space-y-8">
                 {[
                   {
                     step: "01",
@@ -561,12 +654,12 @@ export default function Home() {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.2 }}
                     viewport={{ once: true }}
-                    className="flex gap-4 sm:gap-6"
+                    className="flex gap-6"
                   >
-                    <div className="text-2xl sm:text-3xl font-light text-gray-300 flex-shrink-0">{item.step}</div>
+                    <div className="text-2xl font-light text-gray-300 flex-shrink-0">{item.step}</div>
                     <div>
-                      <h3 className="text-lg sm:text-xl font-medium text-gray-900 mb-1 sm:mb-2">{item.title}</h3>
-                      <p className="text-sm sm:text-base text-gray-500">{item.description}</p>
+                      <h3 className="text-lg font-medium text-gray-900 mb-1">{item.title}</h3>
+                      <p className="text-sm text-gray-500">{item.description}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -579,32 +672,29 @@ export default function Home() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="relative px-4 lg:px-0"
+              className="relative"
             >
-              <div className="bg-gray-50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 border border-gray-200">
-                <div className="space-y-3 sm:space-y-4">
-                  {/* Grid visualization */}
-                  <div className="grid grid-cols-3 gap-1 sm:gap-2 mb-4 sm:mb-6">
+              <div className="bg-gray-50 rounded-3xl p-8 border border-gray-200">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-2 mb-6">
                     {[...Array(9)].map((_, i) => (
                       <div key={i} className="aspect-square bg-white border border-gray-200 rounded-lg flex items-center justify-center">
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-400 rounded-full" />
+                        <div className="w-2 h-2 bg-emerald-400 rounded-full" />
                       </div>
                     ))}
                   </div>
                   
-                  {/* Process lines */}
-                  <svg className="w-full h-8 sm:h-10 md:h-12" viewBox="0 0 300 48" preserveAspectRatio="xMidYMid meet">
+                  <svg className="w-full h-12" viewBox="0 0 300 48" preserveAspectRatio="xMidYMid meet">
                     <line x1="40" y1="24" x2="260" y2="24" stroke="#e5e7eb" strokeWidth="2" strokeDasharray="6 6" />
                     <circle cx="40" cy="24" r="3" fill="#10b981" />
                     <circle cx="150" cy="24" r="3" fill="#10b981" />
                     <circle cx="260" cy="24" r="3" fill="#10b981" />
                   </svg>
                   
-                  {/* Data points */}
-                  <div className="grid grid-cols-4 gap-1 sm:gap-2">
+                  <div className="grid grid-cols-4 gap-2">
                     {[...Array(4)].map((_, i) => (
-                      <div key={i} className="h-12 sm:h-14 md:h-16 bg-white border border-gray-200 rounded-lg p-1 sm:p-2">
-                        <div className="w-full h-1 bg-gray-200 rounded mb-1 sm:mb-2" />
+                      <div key={i} className="h-16 bg-white border border-gray-200 rounded-lg p-2">
+                        <div className="w-full h-1 bg-gray-200 rounded mb-2" />
                         <div className="w-2/3 h-1 bg-gray-200 rounded" />
                       </div>
                     ))}
@@ -617,7 +707,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="relative py-16 sm:py-20 md:py-24 lg:py-32 bg-gray-50">
+      <section id="testimonials" className="relative py-20 md:py-32 bg-gray-50">
         <Container>
           <SectionHeader
             title="Trusted by operations teams everywhere"
@@ -625,7 +715,7 @@ export default function Home() {
             align="center"
           />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {testimonials.map((testimonial, index) => (
               <TestimonialCard key={testimonial.author} testimonial={testimonial} index={index} />
             ))}
@@ -634,82 +724,65 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="relative py-16 sm:py-20 md:py-24 lg:py-32">
+      <section className="relative py-20 md:py-32">
         <Container>
-          <div className="max-w-3xl mx-auto text-center px-4">
+          <div className="max-w-3xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 mb-4 sm:mb-6">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-light text-gray-900 mb-6">
                 Ready to bring clarity to your operations?
               </h2>
-              <p className="text-base sm:text-lg md:text-xl text-gray-500 mb-6 sm:mb-8 md:mb-10">
+              <p className="text-lg sm:text-xl text-gray-500 mb-8">
                 Start your free trial today. No credit card required.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/auth/signup"
-                  className="px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 bg-gray-900 text-white rounded-xl text-sm sm:text-base font-medium hover:bg-gray-800 transition-colors"
+                  className="px-8 py-4 bg-gray-900 text-white rounded-xl text-base font-medium hover:bg-gray-800 transition-colors"
                 >
                   Get started
                 </Link>
                 <Link
                   href="/auth/login"
-                  className="px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 border border-gray-300 text-gray-700 rounded-xl text-sm sm:text-base font-medium hover:border-gray-400 hover:text-gray-900 transition-colors"
+                  className="px-8 py-4 border border-gray-300 text-gray-700 rounded-xl text-base font-medium hover:border-gray-400 hover:text-gray-900 transition-colors"
                 >
                   Log in
                 </Link>
-              </div>
-              
-              {/* Geometric decoration */}
-              <div className="mt-8 sm:mt-10 md:mt-12 flex justify-center space-x-2">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-300 rounded-full" />
-                ))}
               </div>
             </motion.div>
           </div>
         </Container>
       </section>
 
-      {/* Footer */}
-      <footer className="relative border-t border-gray-200 py-12 sm:py-16">
+      {/* Footer - With proper links */}
+      <footer className="relative border-t border-gray-200 py-12">
         <Container>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
             <div className="col-span-2 md:col-span-1">
               <div className="mb-4">
-                <Image src="/logo-text.svg" width={120} height={32} alt="Plantheory" className="sm:w-[150px]" />
+                <Image src="/logo-text.svg" width={120} height={32} alt="Plantheory" />
               </div>
-              <p className="text-xs sm:text-sm text-gray-500">
+              <p className="text-sm text-gray-500">
                 The single source of truth for how your business operates.
               </p>
             </div>
             
-            {[
-              {
-                title: "Product",
-                links: ["Features", "Pricing", "Integrations", "Changelog"]
-              },
-              {
-                title: "Resources",
-                links: ["Documentation", "Guides", "API", "Support"]
-              },
-              {
-                title: "Company",
-                links: ["About", "Blog", "Careers", "Contact"]
-              }
-            ].map(section => (
+            {footerSections.map(section => (
               <div key={section.title}>
-                <h4 className="font-medium text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">{section.title}</h4>
-                <ul className="space-y-1.5 sm:space-y-2">
+                <h4 className="font-medium text-gray-900 mb-4 text-sm">{section.title}</h4>
+                <ul className="space-y-2">
                   {section.links.map(link => (
-                    <li key={link}>
-                      <Link href="#" className="text-xs sm:text-sm text-gray-500 hover:text-gray-900 transition-colors">
-                        {link}
+                    <li key={link.label}>
+                      <Link 
+                        href={link.href} 
+                        className="text-sm text-gray-500 hover:text-emerald-600 transition-colors"
+                      >
+                        {link.label}
                       </Link>
                     </li>
                   ))}
@@ -718,12 +791,12 @@ export default function Home() {
             ))}
           </div>
           
-          <div className="pt-6 sm:pt-8 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-400">
+          <div className="pt-8 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-400">
             <div>© {new Date().getFullYear()} Plantheory. All rights reserved.</div>
-            <div className="flex gap-4 sm:gap-6 lg:gap-8">
-              <Link href="#" className="hover:text-gray-600 transition-colors">Privacy</Link>
-              <Link href="#" className="hover:text-gray-600 transition-colors">Terms</Link>
-              <Link href="#" className="hover:text-gray-600 transition-colors">Cookies</Link>
+            <div className="flex gap-6">
+              <Link href="/privacy" className="hover:text-gray-600 transition-colors">Privacy</Link>
+              <Link href="/terms" className="hover:text-gray-600 transition-colors">Terms</Link>
+              <Link href="/cookies" className="hover:text-gray-600 transition-colors">Cookies</Link>
             </div>
           </div>
         </Container>
