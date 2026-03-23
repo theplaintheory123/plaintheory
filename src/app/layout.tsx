@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { constructMetadata, generateOrganizationSchema, generateWebsiteSchema, generateSoftwareApplicationSchema } from '@/lib/seo/config'
 import './globals.css'
 import { Analytics } from '@vercel/analytics/next'
 
@@ -16,7 +15,6 @@ const geistMono = Geist_Mono({
   display: 'swap',
 })
 
-export const metadata: Metadata = constructMetadata()
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -40,16 +38,6 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify([
-              generateOrganizationSchema(),
-              generateWebsiteSchema(),
-              generateSoftwareApplicationSchema(),
-            ]),
-          }}
-        />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Analytics/>
