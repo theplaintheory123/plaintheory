@@ -9,11 +9,11 @@ export async function POST(req: NextRequest) {
   const payload = await verifyToken(token);
   if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
-  // Ensure user prefs exist
-  await upsertUserPrefs(payload.sub, {
+  // Ensure user prefs exist — non-blocking, don't let DB errors crash sign-in
+  upsertUserPrefs(payload.sub, {
     email: payload.email,
     displayName: payload.name || payload.email.split("@")[0],
-  });
+  }).catch((err) => console.error("[session] upsertUserPrefs failed:", err.message));
 
   const res = NextResponse.json({ user: { id: payload.sub, email: payload.email, name: payload.name } });
   res.cookies.set(COOKIE_NAME, token, {

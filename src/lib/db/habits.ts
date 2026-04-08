@@ -49,9 +49,10 @@ export async function getTodayChecks(userId: string, date: string): Promise<Habi
       ExpressionAttributeValues: {
         ":pk": pk(userId),
         ":prefix": `HABIT_CHECK#`,
+        ":date": date,
       },
-      FilterExpression: "#date = :date",
-      ExpressionAttributeNames: { "#date": "date" },
+      FilterExpression: "#d = :date",
+      ExpressionAttributeNames: { "#d": "date" },
     })
   );
   return (res.Items || []).map((i) => ({
