@@ -9,6 +9,14 @@
   --accent: #6366f1;
 }
 
+[data-theme="lifeos"] {
+  --background: #FAF8F5;
+  --foreground: #1A1817;
+  --accent: #C2786B;
+  --surface: #F2EDE8;
+  --border: rgba(26, 24, 23, 0.08);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
