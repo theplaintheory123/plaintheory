@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import WeatherWidget from "@/components/widgets/weather/WeatherWidget";
 import CalendarWidget from "@/components/widgets/calendar/CalendarWidget";
 import TasksWidget from "@/components/widgets/tasks/TasksWidget";
@@ -7,77 +8,85 @@ import FocusWidget from "@/components/widgets/focus/FocusWidget";
 import HabitsWidget from "@/components/widgets/habits/HabitsWidget";
 import BookmarksWidget from "@/components/widgets/bookmarks/BookmarksWidget";
 import StatusWidget from "@/components/widgets/status/StatusWidget";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+} from "@/components/ui/Card";
 
-function WidgetShell({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function WidgetCard({
+  children,
+  className = "",
+  fallback,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  fallback?: React.ReactNode;
+}) {
   return (
-    <div className={`rounded-2xl border border-[#1A1817]/6 bg-white p-5 ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-function WidgetSkeleton({ height = "h-48" }: { height?: string }) {
-  return (
-    <div className={`rounded-2xl border border-[#1A1817]/6 bg-white p-5 ${height} animate-pulse`}>
-      <div className="mb-4 h-2 w-16 rounded-full bg-[#1A1817]/5" />
-      <div className="space-y-2">
-        <div className="h-3 w-3/4 rounded-full bg-[#1A1817]/5" />
-        <div className="h-3 w-1/2 rounded-full bg-[#1A1817]/5" />
-      </div>
-    </div>
+    <Card className={`overflow-hidden border border-stone-200 bg-white shadow-none rounded-2xl ${className}`}>
+      <Suspense
+        fallback={
+          fallback ?? (
+            <div className="p-5 space-y-3">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-3/4" />
+            </div>
+          )
+        }
+      >
+        {children}
+      </Suspense>
+    </Card>
   );
 }
 
 export default function DashboardPage() {
   return (
-    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 auto-rows-auto">
+    <div className="space-y-4">
 
-      {/* Row 1: Status (narrow), Weather (medium), Calendar (medium) */}
-      <WidgetShell className="h-56 id-status">
-        <StatusWidget />
-      </WidgetShell>
+      {/* Row 1 — 3 equal columns on lg, 2 on md, 1 on sm */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <WidgetCard>
+          <StatusWidget />
+        </WidgetCard>
 
-      <WidgetShell className="h-56">
-        <Suspense fallback={<div className="h-full animate-pulse bg-[#1A1817]/3 rounded-xl" />}>
+        <WidgetCard>
           <WeatherWidget />
-        </Suspense>
-      </WidgetShell>
+        </WidgetCard>
 
-      <WidgetShell className="h-56">
-        <CalendarWidget />
-      </WidgetShell>
+        <WidgetCard className="md:col-span-2 lg:col-span-1">
+          <CalendarWidget />
+        </WidgetCard>
+      </div>
 
-      {/* Row 2: Tasks (large), Focus (small), Habits (medium) */}
-      <WidgetShell className="h-80 sm:col-span-2 lg:col-span-1 id-tasks">
-        <Suspense fallback={<div className="h-full animate-pulse bg-[#1A1817]/3 rounded-xl" />}>
+      {/* Row 2 — Tasks wide, Focus, Habits */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <WidgetCard className="md:row-span-1 lg:col-span-1">
           <TasksWidget />
-        </Suspense>
-      </WidgetShell>
+        </WidgetCard>
 
-      <WidgetShell className="h-80 id-focus">
-        <Suspense fallback={<div className="h-full animate-pulse bg-[#1A1817]/3 rounded-xl" />}>
+        <WidgetCard>
           <FocusWidget />
-        </Suspense>
-      </WidgetShell>
+        </WidgetCard>
 
-      <WidgetShell className="h-80 id-habits">
-        <Suspense fallback={<div className="h-full animate-pulse bg-[#1A1817]/3 rounded-xl" />}>
+        <WidgetCard>
           <HabitsWidget />
-        </Suspense>
-      </WidgetShell>
+        </WidgetCard>
+      </div>
 
-      {/* Row 3: Notes (large), Bookmarks (medium) */}
-      <WidgetShell className="h-72 sm:col-span-2 id-notes">
-        <Suspense fallback={<div className="h-full animate-pulse bg-[#1A1817]/3 rounded-xl" />}>
+      {/* Row 3 — Notes wide + Bookmarks */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <WidgetCard className="md:col-span-2">
           <NotesWidget />
-        </Suspense>
-      </WidgetShell>
+        </WidgetCard>
 
-      <WidgetShell className="h-72 id-bookmarks">
-        <Suspense fallback={<div className="h-full animate-pulse bg-[#1A1817]/3 rounded-xl" />}>
+        <WidgetCard>
           <BookmarksWidget />
-        </Suspense>
-      </WidgetShell>
+        </WidgetCard>
+      </div>
 
     </div>
   );

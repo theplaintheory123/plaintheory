@@ -1,62 +1,103 @@
-interface CardProps {
-  children: React.ReactNode
-  className?: string
-  hover?: boolean
-}
+import * as React from "react"
 
-export default function Card({ children, className = '', hover = false }: CardProps) {
+import { cn } from "@/lib/utils"
+
+function Card({
+  className,
+  size = "default",
+  ...props
+}: React.ComponentProps<"div"> & { size?: "default" | "sm" }) {
   return (
     <div
-      className={`rounded-2xl border border-slate-200 bg-white p-6 shadow-sm ${
-        hover ? 'transition-all hover:border-indigo-200 hover:shadow-lg' : ''
-      } ${className}`}
-    >
-      {children}
-    </div>
+      data-slot="card"
+      data-size={size}
+      className={cn(
+        "group/card flex flex-col gap-4 overflow-hidden rounded-xl bg-card py-4 text-sm text-card-foreground ring-1 ring-foreground/10 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
+        className
+      )}
+      {...props}
+    />
   )
 }
 
-interface CardHeaderProps {
-  children: React.ReactNode
-  className?: string
+function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-header"
+      className={cn(
+        "group/card-header @container/card-header grid auto-rows-min items-start gap-1 rounded-t-xl px-4 group-data-[size=sm]/card:px-3 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
-export function CardHeader({ children, className = '' }: CardHeaderProps) {
-  return <div className={`mb-4 ${className}`}>{children}</div>
+function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-title"
+      className={cn(
+        "font-heading text-base leading-snug font-medium group-data-[size=sm]/card:text-sm",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
-interface CardTitleProps {
-  children: React.ReactNode
-  className?: string
+function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-description"
+      className={cn("text-sm text-muted-foreground", className)}
+      {...props}
+    />
+  )
 }
 
-export function CardTitle({ children, className = '' }: CardTitleProps) {
-  return <h3 className={`text-xl font-semibold text-slate-900 ${className}`}>{children}</h3>
+function CardAction({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-action"
+      className={cn(
+        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
-interface CardDescriptionProps {
-  children: React.ReactNode
-  className?: string
+function CardContent({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-content"
+      className={cn("px-4 group-data-[size=sm]/card:px-3", className)}
+      {...props}
+    />
+  )
 }
 
-export function CardDescription({ children, className = '' }: CardDescriptionProps) {
-  return <p className={`text-slate-600 ${className}`}>{children}</p>
+function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-footer"
+      className={cn(
+        "flex items-center rounded-b-xl border-t bg-muted/50 p-4 group-data-[size=sm]/card:p-3",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
-interface CardContentProps {
-  children: React.ReactNode
-  className?: string
-}
-
-export function CardContent({ children, className = '' }: CardContentProps) {
-  return <div className={className}>{children}</div>
-}
-
-interface CardFooterProps {
-  children: React.ReactNode
-  className?: string
-}
-
-export function CardFooter({ children, className = '' }: CardFooterProps) {
-  return <div className={`mt-4 pt-4 border-t border-slate-100 ${className}`}>{children}</div>
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardAction,
+  CardDescription,
+  CardContent,
 }

@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import { Bookmark } from "@/types";
-import { ExternalLink, Plus, Trash2, Link2 } from "lucide-react";
+import { CardContent, CardHeader } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Bookmark as BookmarkIcon, Plus, Trash2, X, Link2 } from "lucide-react";
 
-interface Props {
-  initialBookmarks: Bookmark[];
-}
-
-export default function BookmarkList({ initialBookmarks }: Props) {
+export default function BookmarkList({ initialBookmarks }: { initialBookmarks: Bookmark[] }) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>(initialBookmarks);
   const [showAdd, setShowAdd] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -43,78 +42,82 @@ export default function BookmarkList({ initialBookmarks }: Props) {
   }
 
   function getFavicon(url: string) {
-    try {
-      const domain = new URL(url).hostname;
-      return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-    } catch {
-      return null;
-    }
+    try { return `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=32`; }
+    catch { return null; }
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-xs font-medium uppercase tracking-wider text-[#1A1817]/40">Bookmarks</h3>
-        <button onClick={() => setShowAdd(!showAdd)} className="rounded-lg p-1 text-[#1A1817]/30 hover:bg-[#C2786B]/10 hover:text-[#C2786B] transition">
-          <Plus size={16} />
-        </button>
-      </div>
-
-      {showAdd && (
-        <form onSubmit={addBookmark} className="mb-3 flex flex-col gap-2 rounded-xl border border-[#C2786B]/20 bg-[#FAF8F5] p-3">
-          <input
-            autoFocus
-            type="text"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            placeholder="Title"
-            className="w-full bg-transparent text-sm text-[#1A1817] outline-none placeholder:text-[#1A1817]/30"
-          />
-          <input
-            type="text"
-            value={newUrl}
-            onChange={(e) => setNewUrl(e.target.value)}
-            placeholder="URL"
-            className="w-full bg-transparent text-sm text-[#1A1817] outline-none placeholder:text-[#1A1817]/30 font-mono"
-          />
-          <button type="submit" disabled={adding} className="self-end rounded-lg bg-[#C2786B] px-3 py-1 text-xs text-white disabled:opacity-50">
-            Add
-          </button>
-        </form>
-      )}
-
-      <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-2 gap-2">
-          {bookmarks.map((bm) => {
-            const favicon = getFavicon(bm.url);
-            return (
-              <div key={bm.id} className="group relative flex items-center gap-2 rounded-xl border border-[#1A1817]/6 bg-white p-3 hover:border-[#C2786B]/30 transition">
-                <a href={bm.url} target="_blank" rel="noopener noreferrer" className="flex flex-1 items-center gap-2 min-w-0">
-                  {favicon ? (
-                    <img src={favicon} alt="" className="h-4 w-4 shrink-0 rounded" />
-                  ) : (
-                    <Link2 size={14} className="shrink-0 text-[#1A1817]/30" />
-                  )}
-                  <span className="truncate text-xs text-[#1A1817] font-medium">{bm.title}</span>
-                </a>
-                <button
-                  onClick={() => deleteBookmark(bm.id)}
-                  className="shrink-0 opacity-0 group-hover:opacity-100 text-[#1A1817]/20 hover:text-red-400 transition"
-                >
-                  <Trash2 size={12} />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-
-        {bookmarks.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <Link2 size={24} className="mb-2 text-[#1A1817]/10" />
-            <p className="text-sm text-[#1A1817]/30">No bookmarks yet</p>
+    <>
+      <CardHeader className="border-b border-stone-100 pb-3 pt-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BookmarkIcon size={14} className="text-stone-400" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-stone-400">Bookmarks</span>
           </div>
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => setShowAdd(!showAdd)}>
+            {showAdd ? <X size={14} /> : <Plus size={14} />}
+          </Button>
+        </div>
+      </CardHeader>
+
+      <CardContent className="p-4 flex flex-col gap-3 h-64">
+        {showAdd && (
+          <form onSubmit={addBookmark} className="flex flex-col gap-2 rounded-xl border border-[#C2786B]/25 bg-[#C2786B]/4 p-3">
+            <Input
+              autoFocus
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              placeholder="Title"
+              className="h-8 border-0 bg-transparent px-0 text-sm shadow-none focus-visible:ring-0"
+            />
+            <Input
+              value={newUrl}
+              onChange={(e) => setNewUrl(e.target.value)}
+              placeholder="URL"
+              className="h-8 border-0 bg-transparent px-0 font-mono text-xs shadow-none focus-visible:ring-0"
+            />
+            <Button type="submit" size="sm" disabled={adding} className="self-end h-7 rounded-lg bg-[#C2786B] px-3 text-xs text-white hover:bg-[#C2786B]/80">
+              Save
+            </Button>
+          </form>
         )}
-      </div>
-    </div>
+
+        <div className="flex-1 overflow-y-auto">
+          <div className="grid grid-cols-2 gap-2">
+            {bookmarks.map((bm) => {
+              const favicon = getFavicon(bm.url);
+              return (
+                <div key={bm.id} className="group relative flex items-center gap-2 rounded-xl border border-stone-100 bg-stone-50 p-3 hover:border-stone-200 hover:bg-white transition">
+                  <a href={bm.url} target="_blank" rel="noopener noreferrer" className="flex min-w-0 flex-1 items-center gap-2">
+                    {favicon ? (
+                      <img src={favicon} alt="" className="h-4 w-4 shrink-0 rounded" />
+                    ) : (
+                      <Link2 size={13} className="shrink-0 text-stone-300" />
+                    )}
+                    <span className="truncate text-xs font-medium text-stone-700">{bm.title}</span>
+                  </a>
+                  <button
+                    onClick={() => deleteBookmark(bm.id)}
+                    className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 text-stone-300 hover:text-red-400 transition"
+                  >
+                    <Trash2 size={11} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          {bookmarks.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <Link2 size={28} className="mb-2 text-stone-200" />
+              <p className="text-sm text-stone-400">No bookmarks yet</p>
+              <button onClick={() => setShowAdd(true)} className="mt-2 text-xs text-[#C2786B] hover:underline">
+                Add a bookmark
+              </button>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </>
   );
 }

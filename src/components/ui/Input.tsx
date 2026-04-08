@@ -1,39 +1,20 @@
-import { forwardRef } from 'react'
+import * as React from "react"
+import { Input as InputPrimitive } from "@base-ui/react/input"
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string
-  error?: string
-  hint?: string
+import { cn } from "@/lib/utils"
+
+function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+  return (
+    <InputPrimitive
+      type={type}
+      data-slot="input"
+      className={cn(
+        "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
-const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, hint, className = '', id, ...props }, ref) => {
-    const inputId = id || props.name
-
-    return (
-      <div className="w-full">
-        {label && (
-          <label htmlFor={inputId} className="mb-2 block text-sm font-semibold text-slate-900">
-            {label}
-          </label>
-        )}
-        <input
-          ref={ref}
-          id={inputId}
-          className={`w-full rounded-xl border-2 bg-white px-4 py-3 text-slate-900 transition-colors focus:outline-none focus:ring-4 ${
-            error
-              ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-              : 'border-slate-200 focus:border-indigo-600 focus:ring-indigo-600/10'
-          } ${className}`}
-          {...props}
-        />
-        {hint && !error && <p className="mt-2 text-xs text-slate-500">{hint}</p>}
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-      </div>
-    )
-  }
-)
-
-Input.displayName = 'Input'
-
-export default Input
+export { Input }

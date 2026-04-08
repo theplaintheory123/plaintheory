@@ -1,24 +1,23 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Eye, Edit3, Save } from "lucide-react";
+import { CardContent, CardHeader } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Eye, Edit3 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-interface Props {
-  initialContent: string;
-}
-
-export default function NotesEditor({ initialContent }: Props) {
+export default function NotesEditor({ initialContent }: { initialContent: string }) {
   const [content, setContent] = useState(initialContent);
   const [preview, setPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (content === initialContent) return;
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(save, 1500);
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(save, 1500);
+    return () => { if (timer.current) clearTimeout(timer.current); };
   }, [content]);
 
   async function save() {
@@ -33,47 +32,60 @@ export default function NotesEditor({ initialContent }: Props) {
     setTimeout(() => setSaved(false), 2000);
   }
 
-  // Basic markdown to HTML (bold, italic, headings, lists)
-  function renderMarkdown(md: string): string {
+  function renderMarkdown(md: string) {
     return md
-      .replace(/^### (.+)$/gm, "<h3 style='font-size:14px;font-weight:500;margin:8px 0 4px'>$1</h3>")
-      .replace(/^## (.+)$/gm, "<h2 style='font-size:16px;font-weight:500;margin:10px 0 4px'>$1</h2>")
-      .replace(/^# (.+)$/gm, "<h1 style='font-size:18px;font-weight:500;margin:12px 0 4px'>$1</h1>")
+      .replace(/^### (.+)$/gm, "<h3 class='text-sm font-semibold mt-3 mb-1'>$1</h3>")
+      .replace(/^## (.+)$/gm, "<h2 class='text-base font-semibold mt-4 mb-1'>$1</h2>")
+      .replace(/^# (.+)$/gm, "<h1 class='text-lg font-semibold mt-4 mb-2'>$1</h1>")
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
       .replace(/\*(.+?)\*/g, "<em>$1</em>")
-      .replace(/^- (.+)$/gm, "<li style='margin:2px 0'>$1</li>")
-      .replace(/\n/g, "<br>");
+      .replace(/^- (.+)$/gm, "<li class='ml-4 list-disc text-sm'>$1</li>")
+      .replace(/\n/g, "<br/>");
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-xs font-medium uppercase tracking-wider text-[#1A1817]/40">Notes</h3>
-        <div className="flex items-center gap-2">
-          {saving && <span className="text-[10px] text-[#1A1817]/30">Saving…</span>}
-          {saved && <span className="text-[10px] text-[#C2786B]">Saved</span>}
-          <button
-            onClick={() => setPreview(!preview)}
-            className="rounded-lg p-1 text-[#1A1817]/30 hover:bg-[#1A1817]/5 hover:text-[#1A1817] transition"
-          >
-            {preview ? <Edit3 size={14} /> : <Eye size={14} />}
-          </button>
+    <>
+      <CardHeader className="border-b border-stone-100 pb-3 pt-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Edit3 size={14} className="text-stone-400" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-stone-400">Notes</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {saving && <span className="text-[10px] text-stone-400">Saving…</span>}
+            {saved && <span className="text-[10px] text-[#C2786B] font-medium">Saved ✓</span>}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 rounded-lg"
+              onClick={() => setPreview(!preview)}
+              title={preview ? "Edit" : "Preview"}
+            >
+              {preview ? <Edit3 size={13} /> : <Eye size={13} />}
+            </Button>
+          </div>
         </div>
-      </div>
+      </CardHeader>
 
-      {preview ? (
-        <div
-          className="flex-1 overflow-y-auto text-sm text-[#1A1817]/80 leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(content) || '<span style="opacity:0.3">Nothing here yet…</span>' }}
-        />
-      ) : (
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Start writing… supports **bold**, *italic*, # headings, - lists"
-          className="flex-1 resize-none bg-transparent text-sm text-[#1A1817] placeholder:text-[#1A1817]/25 outline-none leading-relaxed font-mono"
-        />
-      )}
-    </div>
+      <CardContent className="p-4 h-64">
+        {preview ? (
+          <ScrollArea className="h-full">
+            <div
+              className="prose prose-sm max-w-none text-stone-700 pr-3"
+              dangerouslySetInnerHTML={{
+                __html: renderMarkdown(content) || "<span class='text-stone-300'>Nothing here yet…</span>",
+              }}
+            />
+          </ScrollArea>
+        ) : (
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder={"Start writing…\n\nSupports **bold**, *italic*\n# headings, - lists"}
+            className="h-full w-full resize-none bg-transparent font-mono text-sm leading-relaxed text-stone-700 placeholder:text-stone-300 outline-none"
+          />
+        )}
+      </CardContent>
+    </>
   );
 }

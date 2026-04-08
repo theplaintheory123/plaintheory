@@ -1,15 +1,15 @@
 "use client";
 
 import { useTimer } from "@/hooks/useTimer";
-import { Play, Pause, RotateCcw } from "lucide-react";
+import { CardContent, CardHeader } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Play, Pause, RotateCcw, Timer } from "lucide-react";
 
-interface Props {
+export default function FocusTimer({ focusDuration, breakDuration, initialSessionsToday = 0 }: {
   focusDuration: number;
   breakDuration: number;
   initialSessionsToday?: number;
-}
-
-export default function FocusTimer({ focusDuration, breakDuration, initialSessionsToday = 0 }: Props) {
+}) {
   const { state, display, progress, start, pause, reset } = useTimer({
     focusDuration,
     breakDuration,
@@ -24,59 +24,81 @@ export default function FocusTimer({ focusDuration, breakDuration, initialSessio
 
   const isBreak = state.status === "break";
   const isRunning = state.status === "running";
-  const isPaused = state.status === "paused";
+  const totalSessions = state.sessionsToday + initialSessionsToday;
 
-  const r = 54;
-  const circumference = 2 * Math.PI * r;
-  const dash = circumference * (1 - progress);
+  const r = 52;
+  const circ = 2 * Math.PI * r;
+  const dash = circ * (1 - progress);
 
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-4">
-      {/* Ring */}
-      <div className="relative">
-        <svg width="140" height="140" className="-rotate-90">
-          <circle cx="70" cy="70" r={r} fill="none" stroke="#1A1817" strokeOpacity="0.05" strokeWidth="6" />
-          <circle
-            cx="70" cy="70" r={r}
-            fill="none"
-            stroke={isBreak ? "#A88B7D" : "#C2786B"}
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={dash}
-            className="transition-all duration-1000 ease-linear"
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-mono text-3xl font-light text-[#1A1817] tracking-tight">{display}</span>
-          <span className="mt-1 text-[10px] uppercase tracking-wider text-[#1A1817]/30">
-            {isBreak ? "break" : "focus"}
-          </span>
+    <>
+      <CardHeader className="border-b border-stone-100 pb-3 pt-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Timer size={14} className="text-stone-400" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-stone-400">Focus</span>
+          </div>
+          {totalSessions > 0 && (
+            <span className="text-[10px] font-medium text-stone-400">
+              {totalSessions} session{totalSessions !== 1 ? "s" : ""} today
+            </span>
+          )}
         </div>
-      </div>
+      </CardHeader>
 
-      {/* Controls */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={reset}
-          className="rounded-xl p-2 text-[#1A1817]/30 hover:bg-[#1A1817]/5 hover:text-[#1A1817] transition"
-        >
-          <RotateCcw size={16} />
-        </button>
-        <button
-          onClick={isRunning ? pause : start}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-[#C2786B] text-white shadow-sm hover:bg-[#C2786B]/80 transition"
-        >
-          {isRunning ? <Pause size={16} /> : <Play size={16} />}
-        </button>
-      </div>
+      <CardContent className="flex flex-col items-center justify-center gap-5 py-6 px-4">
+        {/* Ring */}
+        <div className="relative">
+          <svg width="130" height="130" className="-rotate-90">
+            <circle cx="65" cy="65" r={r} fill="none" stroke={isBreak ? "#e7e5e4" : "#f5f5f4"} strokeWidth="5" />
+            <circle
+              cx="65" cy="65" r={r}
+              fill="none"
+              stroke={isBreak ? "#a8a29e" : "#C2786B"}
+              strokeWidth="5"
+              strokeLinecap="round"
+              strokeDasharray={circ}
+              strokeDashoffset={dash}
+              className="transition-all duration-1000 ease-linear"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="font-mono text-2xl font-light tracking-tighter text-stone-800">{display}</span>
+            <span className={`text-[10px] font-semibold uppercase tracking-wider mt-0.5 ${isBreak ? "text-stone-400" : "text-[#C2786B]"}`}>
+              {isBreak ? "break" : "focus"}
+            </span>
+          </div>
+        </div>
 
-      {/* Sessions today */}
-      <div className="text-center">
-        <p className="text-xs text-[#1A1817]/40">
-          {state.sessionsToday + initialSessionsToday} session{state.sessionsToday + initialSessionsToday !== 1 ? "s" : ""} today
-        </p>
-      </div>
-    </div>
+        {/* Controls */}
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={reset}
+            className="h-9 w-9 rounded-xl text-stone-400 hover:text-stone-600"
+          >
+            <RotateCcw size={15} />
+          </Button>
+          <Button
+            onClick={isRunning ? pause : start}
+            className="h-11 w-11 rounded-full bg-[#C2786B] text-white shadow-sm hover:bg-[#C2786B]/85"
+            size="icon"
+          >
+            {isRunning ? <Pause size={16} /> : <Play size={16} />}
+          </Button>
+          <div className="w-9" />
+        </div>
+
+        {/* Session dots */}
+        {totalSessions > 0 && (
+          <div className="flex gap-1.5">
+            {Array.from({ length: Math.min(totalSessions, 8) }).map((_, i) => (
+              <div key={i} className="h-1.5 w-1.5 rounded-full bg-[#C2786B]/40" />
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </>
   );
 }

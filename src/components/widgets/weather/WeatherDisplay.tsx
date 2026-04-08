@@ -1,8 +1,10 @@
 "use client";
 
 import { WeatherData } from "@/types";
+import { CardContent, CardHeader } from "@/components/ui/Card";
+import { Cloud } from "lucide-react";
 
-const WEATHER_ICONS: Record<string, string> = {
+const ICONS: Record<string, string> = {
   "01d": "☀️", "01n": "🌙", "02d": "⛅", "02n": "☁️",
   "03d": "☁️", "03n": "☁️", "04d": "☁️", "04n": "☁️",
   "09d": "🌧️", "09n": "🌧️", "10d": "🌦️", "10n": "🌧️",
@@ -11,42 +13,50 @@ const WEATHER_ICONS: Record<string, string> = {
 };
 
 export default function WeatherDisplay({ data }: { data: WeatherData }) {
-  const icon = WEATHER_ICONS[data.current.icon] || "🌡️";
-
   return (
-    <div className="flex h-full flex-col">
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-xs font-medium uppercase tracking-wider text-[#1A1817]/40">Weather</h3>
-        <span className="text-xs text-[#1A1817]/30">{data.location}</span>
-      </div>
-
-      <div className="flex items-center gap-3 mb-4">
-        <span className="text-5xl">{icon}</span>
-        <div>
-          <p className="text-3xl font-light text-[#1A1817] tracking-tight">{data.current.temp}°</p>
-          <p className="text-xs capitalize text-[#1A1817]/50">{data.current.description}</p>
-        </div>
-      </div>
-
-      <div className="flex gap-4 mb-4 text-xs text-[#1A1817]/40">
-        <span>Feels {data.current.feelsLike}°</span>
-        <span>{data.current.humidity}% humidity</span>
-        <span>{data.current.windSpeed} m/s</span>
-      </div>
-
-      {/* 3-day forecast */}
-      <div className="flex gap-2 mt-auto">
-        {data.forecast.map((day) => (
-          <div key={day.date} className="flex-1 rounded-xl bg-[#FAF8F5] p-2.5 text-center">
-            <p className="text-[10px] text-[#1A1817]/40 mb-1">
-              {new Date(day.date).toLocaleDateString("en-US", { weekday: "short" })}
-            </p>
-            <p className="text-xl mb-1">{WEATHER_ICONS[day.icon] || "🌡️"}</p>
-            <p className="text-xs font-medium text-[#1A1817]">{Math.round(day.high)}°</p>
-            <p className="text-[10px] text-[#1A1817]/40">{Math.round(day.low)}°</p>
+    <>
+      <CardHeader className="border-b border-stone-100 pb-3 pt-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Cloud size={14} className="text-stone-400" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-stone-400">Weather</span>
           </div>
-        ))}
-      </div>
-    </div>
+          <span className="text-xs text-stone-400">{data.location}</span>
+        </div>
+      </CardHeader>
+      <CardContent className="p-5 space-y-4">
+        {/* Current */}
+        <div className="flex items-center gap-4">
+          <span className="text-5xl leading-none">{ICONS[data.current.icon] || "🌡️"}</span>
+          <div>
+            <p className="text-4xl font-light text-stone-900">{data.current.temp}°<span className="text-lg text-stone-400">C</span></p>
+            <p className="text-xs capitalize text-stone-400 mt-0.5">{data.current.description}</p>
+          </div>
+        </div>
+
+        {/* Details */}
+        <div className="flex gap-3 text-xs text-stone-400">
+          <span>Feels {data.current.feelsLike}°</span>
+          <span className="text-stone-200">·</span>
+          <span>{data.current.humidity}% humidity</span>
+          <span className="text-stone-200">·</span>
+          <span>{data.current.windSpeed} m/s</span>
+        </div>
+
+        {/* Forecast */}
+        <div className="grid grid-cols-3 gap-2 pt-1">
+          {data.forecast.map((day) => (
+            <div key={day.date} className="flex flex-col items-center gap-1 rounded-xl bg-stone-50 py-3">
+              <p className="text-[10px] font-medium text-stone-400">
+                {new Date(day.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short" })}
+              </p>
+              <span className="text-xl">{ICONS[day.icon] || "🌡️"}</span>
+              <p className="text-xs font-semibold text-stone-700">{Math.round(day.high)}°</p>
+              <p className="text-[10px] text-stone-400">{Math.round(day.low)}°</p>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </>
   );
 }
