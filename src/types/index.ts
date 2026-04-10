@@ -102,3 +102,39 @@ export interface CalendarEvent {
   allDay: boolean;
   location?: string;
 }
+
+export interface Expense {
+  id: string;
+  userId: string;
+  amount: number;
+  category: string;
+  description: string;
+  date: string;
+  createdAt: string;
+}
+
+export interface Goal {
+  id: string;
+  userId: string;
+  title: string;
+  description: string;
+  category: string;
+  targetValue: number;
+  currentValue: number;
+  unit: string;
+  deadline: string | null;
+  color: string;
+  archived: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GoalLog {
+  id: string;
+  goalId: string;
+  userId: string;
+  value: number;
+  date: string;
+  note: string;
+  createdAt: string;
+}

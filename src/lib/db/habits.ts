@@ -41,6 +41,21 @@ export async function archiveHabit(userId: string, habitId: string): Promise<voi
   );
 }
 
+export async function getAllHabitChecks(userId: string): Promise<HabitCheck[]> {
+  const res = await db.send(
+    new QueryCommand({
+      TableName: TABLE,
+      KeyConditionExpression: "PK = :pk AND begins_with(SK, :prefix)",
+      ExpressionAttributeValues: { ":pk": pk(userId), ":prefix": "HABIT_CHECK#" },
+    })
+  );
+  return (res.Items || []).map((i) => ({
+    habitId: i.habitId,
+    date: i.date,
+    completed: i.completed,
+  }));
+}
+
 export async function getTodayChecks(userId: string, date: string): Promise<HabitCheck[]> {
   const res = await db.send(
     new QueryCommand({

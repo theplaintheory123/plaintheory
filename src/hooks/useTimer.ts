@@ -96,5 +96,7 @@ export function useTimer({ focusDuration = 25, breakDuration = 5, onFocusComplet
     start: () => dispatch({ type: "START" }),
     pause: () => dispatch({ type: "PAUSE" }),
     reset: () => dispatch({ type: "RESET" }),
+    setDuration: (focus: number, brk?: number) =>
+      dispatch({ type: "SET_DURATION", focusDuration: focus, breakDuration: brk ?? state.breakDuration }),
   };
 }

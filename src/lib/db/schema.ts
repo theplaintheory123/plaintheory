@@ -9,6 +9,9 @@ export const sk = {
   focus: (timestamp: string) => `FOCUS#${timestamp}`,
   report: (type: string, date: string) => `REPORT#${type}#${date}`,
   prefs: () => `PREFS#main`,
+  goal: (goalId: string) => `GOAL#${goalId}`,
+  goalLog: (goalId: string, timestamp: string) => `GOAL_LOG#${goalId}#${timestamp}`,
+  expense: (expenseId: string) => `EXPENSE#${expenseId}`,
 };
 
 export const gsi1 = {

@@ -1,6 +1,6 @@
 // app/page.tsx
 "use client";
-
+import React from "react";
 import { useRef, useState } from "react";
 import {
   motion,
@@ -8,12 +8,18 @@ import {
   useTransform,
   useInView,
   MotionValue,
+  useSpring,
 } from "framer-motion";
-
-// Custom hook for parallax effect
-const useParallax = (value: MotionValue<number>, distance: number) => {
-  return useTransform(value, [0, 1], [-distance, distance]);
-};
+import { DottedGlowBackground } from "@/components/ui/dotted-glow-background";
+import { MacbookScroll } from "@/components/ui/macbook-scroll";
+import { Badge } from "@/components/ui/badge";
+import { Box, Lock, Search, Sparkles, Calendar, Shield, Eye, Wind } from "lucide-react";
+import {
+  DraggableCardBody,
+  DraggableCardContainer,
+} from "@/components/ui/draggable-card";
+import WorldMap from "@/components/ui/world-map";
+import { LampContainer } from "@/components/ui/lamp";
 
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -26,6 +32,20 @@ export default function LandingPage() {
     offset: ["start start", "end end"],
   });
 
+  const smoothScrollYProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  // Smooth scroll function
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
@@ -33,26 +53,18 @@ export default function LandingPage() {
   };
 
   return (
-    <main ref={containerRef} className="relative min-h-screen w-full overflow-x-hidden bg-[#FAF8F5] font-sans text-[#1A1817] antialiased">
-      {/* Background Lines that move with scroll */}
-      <BackgroundLines scrollYProgress={scrollYProgress} />
-
-      {/* Soft Ambient Orbs */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -left-40 top-0 h-[800px] w-[800px] rounded-full bg-gradient-to-br from-amber-100/20 via-rose-50/10 to-transparent blur-3xl" />
-        <div className="absolute -right-40 bottom-0 h-[800px] w-[800px] rounded-full bg-gradient-to-tl from-stone-200/15 via-amber-100/10 to-transparent blur-3xl" />
-      </div>
-
+    <main ref={containerRef} className="relative min-h-screen w-full overflow-x-hidden bg-gradient-to-b from-[#FCFBF9] via-[#FAF8F5] to-[#F5F2ED] font-sans text-[#1A1817] antialiased">
+      {/* Calm Background Lines with Smooth Parallax */}
+      <BackgroundLines scrollYProgress={smoothScrollYProgress} />
+      
       <div className="relative z-10">
-        <Header mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
-        <HeroSection scrollYProgress={scrollYProgress} email={email} setEmail={setEmail} submitted={submitted} handleSubmit={handleSubmit} />
-        <TrustedBySection />
-        <FeaturesSection />
-        <CorePrinciplesSection />
-        <HeartbeatVisualizationSection scrollYProgress={scrollYProgress} />
-        <ReportsShowcaseSection />
-        <OutcomesSection />
-        <HowItWorksSection />
+        <Header mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} scrollToSection={scrollToSection} />
+        <HeroSection scrollYProgress={smoothScrollYProgress} email={email} setEmail={setEmail} submitted={submitted} handleSubmit={handleSubmit} />
+        <UnifiedConsoleSection />
+        <PrivacyFirstSection />
+        <IntentionalDesignSection />
+        <ReportsSection />
+        <GlobalPresenceSection />
         <TestimonialsSection />
         <PricingSection email={email} setEmail={setEmail} submitted={submitted} handleSubmit={handleSubmit} />
         <FAQSection />
@@ -63,17 +75,15 @@ export default function LandingPage() {
   );
 }
 
-// Background Lines with Parallax Movement
+// Calm Background Lines with Smooth Movement
 function BackgroundLines({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
-  const line1Y = useTransform(scrollYProgress, [0, 1], [0, 300]);
-  const line2Y = useTransform(scrollYProgress, [0, 1], [0, -200]);
-  const line3Y = useTransform(scrollYProgress, [0, 1], [0, 150]);
-  const line1X = useTransform(scrollYProgress, [0, 1], [0, -50]);
-  const line2X = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const line1Y = useTransform(scrollYProgress, [0, 1], [0, 200]);
+  const line2Y = useTransform(scrollYProgress, [0, 1], [0, -150]);
+  const line3Y = useTransform(scrollYProgress, [0, 1], [0, 100]);
   
-  const line1Length = useTransform(scrollYProgress, [0, 0.4], [0, 1]);
-  const line2Length = useTransform(scrollYProgress, [0.1, 0.6], [0, 1]);
-  const line3Length = useTransform(scrollYProgress, [0.2, 0.7], [0, 1]);
+  const line1Length = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
+  const line2Length = useTransform(scrollYProgress, [0.1, 0.5], [0, 1]);
+  const line3Length = useTransform(scrollYProgress, [0.2, 0.6], [0, 1]);
 
   return (
     <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
@@ -82,33 +92,31 @@ function BackgroundLines({ scrollYProgress }: { scrollYProgress: MotionValue<num
         viewBox="0 0 1400 1200"
         preserveAspectRatio="xMidYMid slice"
       >
-        {/* Main horizontal flow line */}
-        <motion.g style={{ y: line1Y, x: line1X }}>
+        {/* Gentle flow lines */}
+        <motion.g style={{ y: line1Y }}>
           <motion.path
-            d="M-50,400 Q350,200 700,400 T1450,400"
+            d="M-50,300 Q350,150 700,300 T1450,300"
             fill="none"
             stroke="#D4C5B9"
-            strokeWidth="1.5"
+            strokeWidth="1"
             style={{ pathLength: line1Length }}
           />
         </motion.g>
 
-        {/* Diagonal accent */}
-        <motion.g style={{ y: line2Y, x: line2X }}>
+        <motion.g style={{ y: line2Y }}>
           <motion.path
-            d="M200,-50 L1200,1250"
+            d="M-50,600 Q350,500 700,600 T1450,600"
             fill="none"
             stroke="#E8D5C4"
             strokeWidth="0.8"
-            strokeDasharray="4 8"
+            strokeDasharray="3 6"
             style={{ pathLength: line2Length }}
           />
         </motion.g>
 
-        {/* Gentle vertical curve */}
         <motion.g style={{ y: line3Y }}>
           <motion.path
-            d="M950,-50 Q1150,600 950,1250"
+            d="M-50,900 Q350,800 700,900 T1450,900"
             fill="none"
             stroke="#DCD3CC"
             strokeWidth="1.2"
@@ -116,35 +124,22 @@ function BackgroundLines({ scrollYProgress }: { scrollYProgress: MotionValue<num
           />
         </motion.g>
 
-        {/* Heartbeat line (ECG) that moves with scroll */}
-        <motion.g style={{ y: useTransform(scrollYProgress, [0, 1], [0, 250]) }}>
-          <motion.path
-            d="M0,800 L100,800 L150,750 L200,850 L250,800 L1400,800"
-            fill="none"
-            stroke="#C2786B"
-            strokeWidth="2"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 2.5, delay: 0.5, ease: "easeInOut" }}
-          />
-        </motion.g>
-
-        {/* Floating particles */}
-        {[...Array(8)].map((_, i) => (
+        {/* Calm floating particles */}
+        {[...Array(12)].map((_, i) => (
           <motion.circle
             key={i}
-            cx={150 + i * 180}
-            cy={300 + (i % 3) * 200}
-            r={2 + (i % 3)}
-            fill={i % 2 === 0 ? "#C2786B" : "#A88B7D"}
+            cx={100 + i * 120}
+            cy={200 + (i % 4) * 250}
+            r={1.5 + (i % 3)}
+            fill="#C2786B"
             initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.7, 0.2] }}
+            animate={{ opacity: [0, 0.4, 0.1] }}
             style={{
-              y: useTransform(scrollYProgress, [0, 1], [0, 100 + i * 30]),
+              y: useTransform(scrollYProgress, [0, 1], [0, 80 + i * 20]),
             }}
             transition={{
-              duration: 3 + i,
-              delay: i * 0.5,
+              duration: 4 + i,
+              delay: i * 0.3,
               repeat: Infinity,
               repeatType: "mirror",
             }}
@@ -155,39 +150,39 @@ function BackgroundLines({ scrollYProgress }: { scrollYProgress: MotionValue<num
   );
 }
 
-// Header Component
-function Header({ mobileMenuOpen, setMobileMenuOpen }: any) {
+// Minimalist Header
+function Header({ mobileMenuOpen, setMobileMenuOpen, scrollToSection }: any) {
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
+      transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
       className="fixed left-0 right-0 top-0 z-40 px-4 py-4 sm:px-6 lg:px-8"
     >
       <div className="mx-auto max-w-7xl">
-        <div className="flex items-center justify-between rounded-2xl border border-[#1A1817]/10 bg-white/60 px-4 py-3 backdrop-blur-md sm:px-6">
+        <div className="flex items-center justify-between rounded-2xl border border-[#1A1817]/8 bg-white/50 px-4 py-3 backdrop-blur-xl sm:px-6">
           <div className="flex items-center gap-2">
             <span className="font-mono text-lg font-light tracking-tight text-[#1A1817] sm:text-xl">
               plaintheory
             </span>
-            <span className="rounded-full bg-[#1A1817]/5 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-[#1A1817]/50">
+            <span className="rounded-full bg-[#C2786B]/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-[#C2786B]">
               LifeOS
             </span>
           </div>
 
-          <nav className="hidden items-center gap-6 md:flex lg:gap-8">
-            {["Features", "Reports", "Principles", "Demo", "Pricing"].map((item) => (
-              <a
+          <nav className="hidden items-center gap-8 md:flex">
+            {["Philosophy", "Features", "Reports", "Pricing"].map((item) => (
+              <button
                 key={item}
-                href={`#${item.toLowerCase()}`}
-                className="text-sm font-medium text-[#1A1817]/60 transition-colors hover:text-[#1A1817]"
+                onClick={() => scrollToSection(item.toLowerCase())}
+                className="text-sm font-medium text-[#1A1817]/50 transition-colors hover:text-[#1A1817]"
               >
                 {item}
-              </a>
+              </button>
             ))}
             <a
               href="/app"
-              className="rounded-full border border-[#C2786B]/30 bg-[#C2786B]/10 px-4 py-1.5 text-sm font-medium text-[#C2786B] backdrop-blur-sm transition-all hover:bg-[#C2786B]/20"
+              className="rounded-full border border-[#C2786B]/20 bg-[#C2786B]/5 px-5 py-2 text-sm font-medium text-[#C2786B] transition-all hover:bg-[#C2786B]/10"
             >
               Sign In
             </a>
@@ -210,18 +205,20 @@ function Header({ mobileMenuOpen, setMobileMenuOpen }: any) {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute left-4 right-4 top-24 rounded-2xl border border-[#1A1817]/10 bg-white/95 p-6 backdrop-blur-xl sm:left-6 sm:right-6 md:hidden"
+          className="absolute left-4 right-4 top-24 rounded-2xl border border-[#1A1817]/10 bg-white/90 p-6 backdrop-blur-xl md:hidden"
         >
           <nav className="flex flex-col gap-4">
-            {["Features", "Reports", "Principles", "Demo", "Pricing"].map((item) => (
-              <a
+            {["Philosophy", "Features", "Reports", "Pricing"].map((item) => (
+              <button
                 key={item}
-                href={`#${item.toLowerCase()}`}
-                className="text-lg font-medium text-[#1A1817]/70"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => {
+                  scrollToSection(item.toLowerCase());
+                  setMobileMenuOpen(false);
+                }}
+                className="text-lg font-medium text-[#1A1817]/60"
               >
                 {item}
-              </a>
+              </button>
             ))}
             <a
               href="/app"
@@ -236,58 +233,36 @@ function Header({ mobileMenuOpen, setMobileMenuOpen }: any) {
   );
 }
 
-// Hero Section - Centered with Side Animations
+// Hero Section - Calm and Centered
 function HeroSection({ scrollYProgress, email, setEmail, submitted, handleSubmit }: any) {
-  const y = useParallax(scrollYProgress, 30);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
 
-  // Side floating elements
-  const leftX = useTransform(scrollYProgress, [0, 1], [-20, -100]);
-  const rightX = useTransform(scrollYProgress, [0, 1], [20, 100]);
-  const rotate = useTransform(scrollYProgress, [0, 1], [0, 360]);
-
   return (
-    <section ref={ref} className="relative flex min-h-screen flex-col items-center justify-center px-4 pt-24 sm:px-6 lg:px-8">
-      {/* Floating side decorations */}
-      <motion.div
-        style={{ x: leftX, rotate }}
-        className="pointer-events-none absolute left-4 top-1/3 hidden lg:block"
-      >
-        <div className="text-8xl opacity-20">◈</div>
-      </motion.div>
-      <motion.div
-        style={{ x: rightX, rotate: useTransform(scrollYProgress, [0, 1], [0, -360]) }}
-        className="pointer-events-none absolute right-4 top-2/3 hidden lg:block"
-      >
-        <div className="text-7xl opacity-20">◈</div>
-      </motion.div>
-
-      <motion.div style={{ y }} className="w-full max-w-5xl text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-        >
-          <span className="mb-4 inline-block font-mono text-xs uppercase tracking-[0.3em] text-[#1A1817]/40 sm:mb-6">
-            Live Now — Start Free
-          </span>
-          <h1 className="mx-auto max-w-4xl font-serif text-4xl font-light leading-[1.1] tracking-tight text-[#1A1817] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
-            Your life,
-            <br />
-            <span className="italic text-[#C2786B]">in rhythm.</span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-base font-light leading-relaxed text-[#1A1817]/70 sm:mt-8 sm:text-lg">
-            Plaintheory is a calm, intentional dashboard that brings your digital life into focus. 
-            Track your days, weeks, and years with beautiful reports that help you see the bigger picture.
-          </p>
-        </motion.div>
-
-        <motion.div
+    <section ref={ref} className="relative flex min-h-screen flex-col items-center justify-center">
+      <motion.div className="w-full text-center">
+        <LampContainer>
+          <motion.h1
+            
+            className="mt-6 bg-gradient-to-br from-[#1A1817] via-[#3A3532] to-[#5A524D] bg-clip-text text-center font-serif text-4xl font-light italic tracking-tight text-transparent md:text-6xl lg:text-7xl"
+          >
+            Your digital life, <br />
+            <span className="text-[#C2786B]">calmly unified</span>
+          </motion.h1>
+          <motion.p
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.3, duration: 0.6 }}
-          className="mt-8 flex justify-center sm:mt-12"
+          transition={{ delay: 0.4, duration: 0.8 }}
+          className="mx-auto mt-6 max-w-2xl text-base text-white sm:text-lg"
+        >
+          One intentional interface for calendar, tasks, weather, and notes. 
+          No distractions. No data harvesting. Just clarity.
+        </motion.p>
+          <motion.div
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ delay: 0.6, duration: 0.8 }}
+          className="mt-10 flex justify-center"
         >
           {!submitted ? (
             <form onSubmit={handleSubmit} className="flex w-full max-w-md flex-col gap-3 sm:flex-row sm:gap-4">
@@ -297,15 +272,15 @@ function HeroSection({ scrollYProgress, email, setEmail, submitted, handleSubmit
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Your email address"
                 required
-                className="flex-1 rounded-full border border-[#1A1817]/10 bg-white/60 px-5 py-3 text-sm backdrop-blur-sm transition-all placeholder:text-[#1A1817]/30 focus:border-[#C2786B]/50 focus:outline-none focus:ring-2 focus:ring-[#C2786B]/20 sm:py-4"
+                className="flex-1 rounded-full border border-[#1A1817]/10 bg-white/60 px-5 py-3.5 text-sm backdrop-blur-sm transition-all placeholder:text-[#1A1817]/30 focus:border-[#C2786B]/40 focus:outline-none focus:ring-2 focus:ring-[#C2786B]/10"
               />
               <button
                 type="submit"
-                className="group relative overflow-hidden rounded-full bg-[#1A1817] px-6 py-3 font-mono text-sm font-medium text-white transition-all hover:bg-[#C2786B] sm:py-4"
+                className="group relative overflow-hidden rounded-full bg-[#1A1817] px-6 py-3.5 font-mono text-sm font-medium text-white transition-all hover:bg-[#C2786B]"
               >
-                <span className="relative z-10">Get Started →</span>
+                <span className="relative z-10">Start Free →</span>
                 <motion.div
-                  className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                  className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
                   initial={{ x: "-100%" }}
                   whileHover={{ x: "100%" }}
                   transition={{ duration: 0.8 }}
@@ -316,318 +291,353 @@ function HeroSection({ scrollYProgress, email, setEmail, submitted, handleSubmit
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-block rounded-full border border-[#C2786B]/30 bg-[#C2786B]/10 px-6 py-4 text-sm backdrop-blur-sm"
+              className="inline-block rounded-full border border-[#C2786B]/20 bg-[#C2786B]/5 px-6 py-3.5 text-sm backdrop-blur-sm"
             >
-              <span className="font-mono text-[#C2786B]">✓ Check your inbox for the magic link!</span>
+              <span className="font-mono text-[#C2786B]">✓ Check your inbox for access</span>
             </motion.div>
           )}
         </motion.div>
+        </LampContainer>
 
-        {/* Dashboard Mockup */}
+        
+
+      
+
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.5, duration: 0.8 }}
-          className="relative mx-auto mt-12 h-[300px] w-full max-w-5xl overflow-hidden rounded-2xl border border-[#1A1817]/10 bg-white/50 shadow-2xl shadow-black/5 backdrop-blur-sm sm:mt-16 sm:h-[350px] md:h-[400px] lg:rounded-3xl"
+          transition={{ delay: 0.8, duration: 0.8 }}
+          className="relative mt-20 w-full"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-[#C2786B]/5 to-transparent" />
-          
-          <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1000 400" preserveAspectRatio="none">
-            <motion.path
-              d="M0,200 L80,200 L130,160 L180,240 L230,200 L1000,200"
-              fill="none"
-              stroke="#C2786B"
-              strokeWidth="3"
-              initial={{ pathLength: 0 }}
-              animate={isInView ? { pathLength: 1 } : {}}
-              transition={{ duration: 2, delay: 0.8, ease: "easeInOut" }}
-            />
-          </svg>
-
-          <div className="relative z-10 grid h-full w-full grid-cols-4 gap-3 p-4 sm:gap-4 sm:p-6 md:p-8">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={isInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ delay: 0.7 }}
-              className="col-span-1 row-span-2 rounded-xl border border-[#1A1817]/10 bg-white/60 p-3 backdrop-blur-sm sm:p-4"
-            >
-              <div className="text-xs uppercase tracking-wider text-[#1A1817]/40">Weather</div>
-              <div className="mt-1 text-2xl sm:mt-2 sm:text-3xl">☀️</div>
-              <div className="text-xl font-light sm:text-2xl">72°</div>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 1 } : {}}
-              transition={{ delay: 0.8 }}
-              className="col-span-2 row-span-1 rounded-xl border border-[#1A1817]/10 bg-white/60 p-3 backdrop-blur-sm sm:p-4"
-            >
-              <div className="text-xs uppercase tracking-wider text-[#1A1817]/40">Today</div>
-              <div className="mt-1 font-serif text-base sm:mt-2 sm:text-xl">Focus time 9-11am</div>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={isInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ delay: 0.9 }}
-              className="col-span-1 row-span-2 rounded-xl border border-[#1A1817]/10 bg-white/60 p-3 backdrop-blur-sm sm:p-4"
-            >
-              <div className="text-xs uppercase tracking-wider text-[#1A1817]/40">Tasks</div>
-              <div className="mt-3 space-y-2 sm:mt-4">
-                <div className="h-1 w-full rounded-full bg-[#1A1817]/20" />
-                <div className="h-1 w-3/4 rounded-full bg-[#1A1817]/20" />
-                <div className="h-1 w-1/2 rounded-full bg-[#1A1817]/20" />
-              </div>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 1.0 }}
-              className="col-span-3 row-span-1 rounded-xl border border-[#1A1817]/10 bg-white/60 p-3 backdrop-blur-sm sm:p-4"
-            >
-              <div className="text-xs uppercase tracking-wider text-[#1A1817]/40">Weekly Report Preview</div>
-              <div className="mt-2 flex items-end gap-1 sm:gap-2">
-                <div className="h-6 w-3 rounded-sm bg-[#C2786B]/60 sm:h-8 sm:w-4" />
-                <div className="h-10 w-3 rounded-sm bg-[#C2786B]/80 sm:h-12 sm:w-4" />
-                <div className="h-5 w-3 rounded-sm bg-[#C2786B]/40 sm:h-6 sm:w-4" />
-                <div className="h-8 w-3 rounded-sm bg-[#C2786B]/70 sm:h-10 sm:w-4" />
-                <div className="h-6 w-3 rounded-sm bg-[#C2786B]/50 sm:h-8 sm:w-4" />
-              </div>
-            </motion.div>
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#FAF8F5] via-transparent to-transparent pointer-events-none z-10" />
+          <MacbookScroll
+            title={
+              <span className="font-serif text-2xl font-light italic text-[#1A1817]">
+                Everything in one place.
+                <br />
+                <span className="text-[#C2786B]">Nothing you don't need.</span>
+              </span>
+            }
+            badge={
+              <a href="https://peerlist.io/manuarora">
+                <Badge className="h-10 w-10 -rotate-12 transform" />
+              </a>
+            }
+            src={`https://cdn.dribbble.com/userupload/44320695/file/18cfe3d258612de2213688e5c83502c1.png?resize=752x&vertical=center`}
+            showGradient={false}
+          />
         </motion.div>
       </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-      >
-        <div className="flex flex-col items-center gap-2">
-          <span className="font-mono text-xs uppercase tracking-wider text-[#1A1817]/30">Scroll</span>
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="h-10 w-5 rounded-full border border-[#1A1817]/20 sm:h-12 sm:w-6"
-          >
-            <motion.div
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-              className="mx-auto mt-2 h-1.5 w-0.5 rounded-full bg-[#1A1817]/30 sm:h-2 sm:w-1"
-            />
-          </motion.div>
-        </div>
-      </motion.div>
     </section>
   );
 }
 
-// Trusted By Section
-function TrustedBySection() {
-  return (
-    <section className="border-y border-[#1A1817]/5 py-10 sm:py-12">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <p className="text-center font-mono text-xs uppercase tracking-wider text-[#1A1817]/40">
-          Trusted by mindful individuals worldwide
-        </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-6 opacity-50 grayscale sm:mt-8 sm:gap-8">
-          {["Notion", "Linear", "Figma", "Vercel", "Stripe"].map((brand) => (
-            <span key={brand} className="font-serif text-lg italic text-[#1A1817]/40 sm:text-xl">
-              {brand}
-            </span>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
-// Features Section
-function FeaturesSection() {
+
+// Unified Console Section - The Dashboard Experience
+function UnifiedConsoleSection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
-  const features = [
-    { icon: "🌤️", title: "Unified View", description: "Weather, calendar, tasks, and notes in a single, serene interface.", color: "#C2786B" },
-    { icon: "📊", title: "Weekly Reports", description: "Get a beautiful summary of your week every Sunday, delivered to your inbox.", color: "#A88B7D" },
-    { icon: "📈", title: "Quarterly Insights", description: "See trends and patterns across three months to adjust your habits.", color: "#B7A08B" },
-    { icon: "📅", title: "Annual Review", description: "A comprehensive year-in-review that celebrates your growth and focus.", color: "#9B8579" },
-    { icon: "🔒", title: "Privacy First", description: "Your data stays local or in your private cloud. No tracking, ever.", color: "#C2786B" },
-    { icon: "⚡", title: "Lightning Fast", description: "Optimized for speed. Loads instantly, responds immediately.", color: "#A88B7D" },
-  ];
+  const isInView = useInView(ref, { once: true });
 
   return (
-    <section id="features" ref={ref} className="py-16 px-4 sm:py-20 lg:py-24 lg:px-8">
+    <section id="features" ref={ref} className="py-20 px-4 sm:py-28 lg:py-32 lg:px-8 bg-white/30">
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.8 }}
-          className="mb-12 text-center sm:mb-16"
+          transition={{ duration: 1 }}
+          className="mb-16 text-center"
         >
           <h2 className="font-serif text-3xl font-light italic text-[#1A1817] sm:text-4xl md:text-5xl">
             Everything in one place
           </h2>
-          <p className="mt-3 font-mono text-xs uppercase tracking-wider text-[#1A1817]/60 sm:mt-4">
-            The features you need, including powerful reports.
+          <p className="mt-4 font-mono text-xs uppercase tracking-wider text-[#1A1817]/40">
+            The tools you need, nothing you don't
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: idx * 0.1, duration: 0.5 }}
-              whileHover={{ y: -5, borderColor: feature.color }}
-              className="group rounded-2xl border border-[#1A1817]/10 bg-white/40 p-6 backdrop-blur-sm transition-all duration-300 sm:p-8"
-            >
-              <div className="mb-4 text-3xl sm:mb-6 sm:text-4xl">{feature.icon}</div>
-              <h3 className="font-serif text-xl font-light text-[#1A1817] sm:text-2xl">{feature.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#1A1817]/60 sm:mt-3">{feature.description}</p>
-              <div
-                className="mt-4 h-0.5 w-12 rounded-full opacity-0 transition-opacity group-hover:opacity-100 sm:mt-6"
-                style={{ backgroundColor: feature.color }}
-              />
-            </motion.div>
-          ))}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="rounded-3xl border border-[#1A1817]/8 bg-white/50 p-8 backdrop-blur-sm"
+          >
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[#C2786B]/10">
+              <Calendar className="h-6 w-6 text-[#C2786B]" />
+            </div>
+            <h3 className="font-serif text-2xl font-light">Unified Dashboard</h3>
+            <p className="mt-3 text-[#1A1817]/60 leading-relaxed">
+              Calendar, tasks, weather, and notes in a single, editorial-quality view. 
+              No more switching between apps or losing context.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="rounded-3xl border border-[#1A1817]/8 bg-white/50 p-8 backdrop-blur-sm"
+          >
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[#A88B7D]/10">
+              <Sparkles className="h-6 w-6 text-[#A88B7D]" />
+            </div>
+            <h3 className="font-serif text-2xl font-light">Smart Widgets</h3>
+            <p className="mt-3 text-[#1A1817]/60 leading-relaxed">
+              Drag and drop widgets to create your perfect layout. Weather, calendar, tasks, 
+              and more — arranged exactly how you think.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="rounded-3xl border border-[#1A1817]/8 bg-white/50 p-8 backdrop-blur-sm"
+          >
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[#9B8579]/10">
+              <Search className="h-6 w-6 text-[#9B8579]" />
+            </div>
+            <h3 className="font-serif text-2xl font-light">Global Search</h3>
+            <p className="mt-3 text-[#1A1817]/60 leading-relaxed">
+              Find anything instantly across your entire digital life. Notes, events, tasks — 
+              all searchable from one place.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="rounded-3xl border border-[#1A1817]/8 bg-white/50 p-8 backdrop-blur-sm"
+          >
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[#C2786B]/10">
+              <Wind className="h-6 w-6 text-[#C2786B]" />
+            </div>
+            <h3 className="font-serif text-2xl font-light">Focus Mode</h3>
+            <p className="mt-3 text-[#1A1817]/60 leading-relaxed">
+              One-click focus mode strips away everything but what matters right now. 
+              Deep work, uninterrupted.
+            </p>
+          </motion.div>
         </div>
       </div>
     </section>
   );
 }
 
-// Core Principles Section
-function CorePrinciplesSection() {
+// Privacy First Section
+function PrivacyFirstSection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true });
 
-  const principles = [
-    { number: "01", title: "Unified", description: "Your calendar, weather, and notes in a single, serene view. No tab-hopping." },
-    { number: "02", title: "Intentional", description: "Every widget serves a purpose. No infinite scroll, no engagement bait." },
-    { number: "03", title: "Owned", description: "Your data stays local or in your private cloud. We never monetize attention." },
+  return (
+    <section className="py-20 px-4 sm:py-28 lg:py-32 lg:px-8 bg-gradient-to-b from-transparent to-[#C2786B]/[0.02]">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#C2786B]/10 px-4 py-1.5 mb-6">
+              <Lock className="h-3.5 w-3.5 text-[#C2786B]" />
+              <span className="text-xs font-medium uppercase tracking-wider text-[#C2786B]">Privacy First</span>
+            </div>
+            <h2 className="font-serif text-3xl font-light italic text-[#1A1817] sm:text-4xl md:text-5xl">
+              Your data belongs to you
+            </h2>
+            <p className="mt-6 text-lg text-[#1A1817]/60 leading-relaxed">
+              Plaintheory stores everything locally by default. Want sync? Enable encrypted 
+              cloud backup with keys only you control. We never see your data, never sell it, 
+              and never will.
+            </p>
+            <ul className="mt-8 space-y-3">
+              {[
+                "Local-first architecture",
+                "End-to-end encryption for sync",
+                "Export everything anytime",
+                "No third-party trackers"
+              ].map((item, i) => (
+                <motion.li 
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={isInView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ delay: 0.3 + i * 0.1 }}
+                  className="flex items-center gap-3 text-[#1A1817]/70"
+                >
+                  <span className="text-[#C2786B]">✓</span>
+                  <span>{item}</span>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="relative"
+          >
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#C2786B]/10 via-transparent to-transparent rounded-3xl" />
+            <div className="rounded-3xl border border-[#1A1817]/8 bg-white/60 p-8 backdrop-blur-sm">
+              <div className="flex items-center gap-4 mb-6">
+                <Shield className="h-8 w-8 text-[#C2786B]" />
+                <div>
+                  <div className="font-mono text-sm text-[#1A1817]/40">Encryption Status</div>
+                  <div className="font-medium text-[#1A1817]">End-to-End Encrypted</div>
+                </div>
+              </div>
+              <div className="space-y-4">
+                {[
+                  { label: "Calendar Data", status: "Local Only" },
+                  { label: "Tasks & Notes", status: "Encrypted Sync" },
+                  { label: "Weather Preferences", status: "Local Only" },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center justify-between py-2 border-b border-[#1A1817]/5">
+                    <span className="text-sm text-[#1A1817]/60">{item.label}</span>
+                    <span className="text-sm font-mono text-[#1A1817]">{item.status}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Intentional Design Section with Draggable Cards
+function IntentionalDesignSection() {
+  const items = [
+    {
+      title: "Minimalist",
+      image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=2600&auto=format&fit=crop",
+      className: "absolute top-8 left-[15%] rotate-[-4deg]",
+    },
+    {
+      title: "Calm",
+      image: "https://images.unsplash.com/photo-1421789665209-c9b2a435e3dc?q=80&w=3542&auto=format&fit=crop",
+      className: "absolute top-20 left-[35%] rotate-[3deg]",
+    },
+    {
+      title: "Focused",
+      image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2560&auto=format&fit=crop",
+      className: "absolute top-12 right-[25%] rotate-[-2deg]",
+    },
+    {
+      title: "Intentional",
+      image: "https://images.unsplash.com/photo-1505142468610-359e7d316be0?q=80&w=3070&auto=format&fit=crop",
+      className: "absolute top-28 right-[15%] rotate-[5deg]",
+    },
+    {
+      title: "Editorial",
+      image: "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?q=80&w=3648&auto=format&fit=crop",
+      className: "absolute top-16 left-[25%] rotate-[-6deg]",
+    },
   ];
 
   return (
-    <section id="principles" className="py-16 px-4 sm:py-20 lg:py-24 lg:px-8 bg-[#1A1817]/[0.02]">
+    <section className="py-20 px-4 sm:py-28 lg:py-32 lg:px-8 border-t border-[#1A1817]/5">
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.8 }}
-          className="mb-12 text-center sm:mb-16"
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
         >
-          <h2 className="font-serif text-3xl font-light italic text-[#1A1817] sm:text-4xl md:text-5xl">The Principles</h2>
-          <p className="mt-3 font-mono text-xs uppercase tracking-wider text-[#1A1817]/60 sm:mt-4">Three tenets of a quieter digital life.</p>
+          <h2 className="font-serif text-3xl font-light italic text-[#1A1817] sm:text-4xl md:text-5xl">
+            Intentional by design
+          </h2>
+          <p className="mt-4 font-mono text-xs uppercase tracking-wider text-[#1A1817]/40">
+            Every pixel serves a purpose
+          </p>
         </motion.div>
-
-        <div className="grid grid-cols-1 gap-8 sm:gap-12 md:grid-cols-3">
-          {principles.map((item, idx) => (
-            <motion.div
-              key={item.number}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: idx * 0.15, duration: 0.6 }}
-              className="group text-center"
-            >
-              <div className="mb-4 font-mono text-4xl font-thin text-[#C2786B]/30 transition-colors group-hover:text-[#C2786B]/50 sm:mb-6 sm:text-5xl">
-                {item.number}
-              </div>
-              <h3 className="font-serif text-xl font-light text-[#1A1817] sm:text-2xl">{item.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#1A1817]/60 sm:mt-3">{item.description}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// Heartbeat Visualization Section
-function HeartbeatVisualizationSection({ scrollYProgress }: any) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-  const pathLength = useTransform(scrollYProgress, [0.3, 0.6], [0, 1]);
-
-  return (
-    <section id="demo" ref={ref} className="py-16 px-4 sm:py-20 lg:py-24 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          className="text-center"
-        >
-          <h2 className="font-serif text-3xl font-light italic text-[#1A1817] sm:text-4xl md:text-5xl">Find your rhythm</h2>
-          <p className="mt-3 font-mono text-xs uppercase tracking-wider text-[#1A1817]/60 sm:mt-4">Track what matters with live visualizations.</p>
-        </motion.div>
-
-        <div className="mt-12 sm:mt-16">
-          <div className="relative h-48 w-full rounded-2xl border border-[#1A1817]/10 bg-white/40 p-4 backdrop-blur-sm sm:h-56 md:h-64 lg:rounded-3xl lg:p-8">
-            <svg width="100%" height="100%" viewBox="0 0 1200 200" preserveAspectRatio="none">
-              <line x1="0" y1="100" x2="1200" y2="100" stroke="#1A1817" strokeWidth="0.5" opacity="0.1" />
-              <motion.path
-                d="M0,100 L80,100 L120,60 L160,140 L200,100 L280,100 L320,40 L360,160 L400,100 L1200,100"
-                fill="none"
-                stroke="#C2786B"
-                strokeWidth="2.5"
-                style={{ pathLength }}
+        
+        <DraggableCardContainer className="relative flex min-h-[500px] w-full items-center justify-center overflow-clip">
+          <p className="absolute top-1/2 mx-auto max-w-sm -translate-y-3/4 text-center font-serif text-2xl font-light italic text-[#1A1817]/30 md:text-4xl">
+            No infinite scroll.
+            <br />
+            No engagement traps.
+          </p>
+          {items.map((item) => (
+            <DraggableCardBody key={item.title} className={item.className}>
+              <img
+                src={item.image}
+                alt={item.title}
+                className="pointer-events-none relative z-10 h-56 w-56 object-cover rounded-2xl shadow-lg"
               />
-              <motion.circle cx="120" cy="60" r="4" fill="#C2786B" initial={{ scale: 0 }} animate={isInView ? { scale: [0, 1.5, 1] } : {}} transition={{ delay: 0.5 }} />
-              <motion.circle cx="160" cy="140" r="3" fill="#C2786B" initial={{ scale: 0 }} animate={isInView ? { scale: [0, 1.5, 1] } : {}} transition={{ delay: 0.7 }} />
-              <motion.circle cx="320" cy="40" r="5" fill="#C2786B" initial={{ scale: 0 }} animate={isInView ? { scale: [0, 2, 1] } : {}} transition={{ delay: 0.9 }} />
-              <motion.circle cx="360" cy="160" r="3" fill="#C2786B" initial={{ scale: 0 }} animate={isInView ? { scale: [0, 1.5, 1] } : {}} transition={{ delay: 1.1 }} />
-              <motion.text x="1100" y="90" fill="#C2786B" fontSize="12" fontFamily="monospace" initial={{ opacity: 0 }} animate={isInView ? { opacity: 1 } : {}} transition={{ delay: 1.5 }}>LIVE</motion.text>
-              <motion.circle cx="1160" cy="85" r="4" fill="#C2786B" initial={{ scale: 0 }} animate={isInView ? { scale: [0, 1, 0.5, 1] } : {}} transition={{ duration: 1.5, repeat: Infinity }} />
-            </svg>
-          </div>
-
-          <div className="mt-6 grid grid-cols-3 gap-4 text-center sm:mt-8">
-            <div><div className="font-mono text-2xl font-light text-[#1A1817] sm:text-3xl">72</div><div className="text-xs uppercase tracking-wider text-[#1A1817]/40">BPM</div></div>
-            <div><div className="font-mono text-2xl font-light text-[#1A1817] sm:text-3xl">8,432</div><div className="text-xs uppercase tracking-wider text-[#1A1817]/40">Steps</div></div>
-            <div><div className="font-mono text-2xl font-light text-[#1A1817] sm:text-3xl">7.5h</div><div className="text-xs uppercase tracking-wider text-[#1A1817]/40">Sleep</div></div>
-          </div>
-        </div>
+              <h3 className="mt-4 text-center font-serif text-xl font-light text-[#1A1817]">
+                {item.title}
+              </h3>
+            </DraggableCardBody>
+          ))}
+        </DraggableCardContainer>
       </div>
     </section>
   );
 }
 
-// Reports Showcase Section
-function ReportsShowcaseSection() {
+// Reports Section - Editorial Quality
+function ReportsSection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
 
   const reports = [
-    { title: "Weekly Reflection", description: "Every Sunday, receive a beautifully designed summary of your week.", image: "📆", color: "#C2786B" },
-    { title: "Quarterly Insights", description: "Every three months, see patterns in your productivity and habits.", image: "📊", color: "#A88B7D" },
-    { title: "Annual Review", description: "A comprehensive year-in-review that celebrates milestones.", image: "🎉", color: "#9B8579" },
+    { 
+      title: "Weekly Reflection", 
+      description: "Every Sunday, a calm summary of your week. Wins, patterns, and moments of focus.",
+      icon: "📋",
+      color: "#C2786B"
+    },
+    { 
+      title: "Quarterly Insights", 
+      description: "See how you spend your time. Understand your rhythms without judgment.",
+      icon: "📊",
+      color: "#A88B7D"
+    },
+    { 
+      title: "Annual Review", 
+      description: "A beautiful year-in-review that celebrates your growth and milestones.",
+      icon: "📖",
+      color: "#9B8579"
+    },
   ];
 
   return (
-    <section id="reports" ref={ref} className="py-16 px-4 sm:py-20 lg:py-24 lg:px-8 bg-[#1A1817]/[0.02]">
+    <section id="reports" ref={ref} className="py-20 px-4 sm:py-28 lg:py-32 lg:px-8 bg-white/40">
       <div className="mx-auto max-w-7xl">
-        <motion.div initial={{ opacity: 0 }} animate={isInView ? { opacity: 1 } : {}} transition={{ duration: 0.8 }} className="mb-12 text-center sm:mb-16">
-          <h2 className="font-serif text-3xl font-light italic text-[#1A1817] sm:text-4xl md:text-5xl">Insights that matter</h2>
-          <p className="mt-3 font-mono text-xs uppercase tracking-wider text-[#1A1817]/60 sm:mt-4">Beautiful reports delivered to you — weekly, quarterly, annually.</p>
+        <motion.div 
+          initial={{ opacity: 0 }} 
+          animate={isInView ? { opacity: 1 } : {}} 
+          transition={{ duration: 1 }} 
+          className="mb-16 text-center"
+        >
+          <h2 className="font-serif text-3xl font-light italic text-[#1A1817] sm:text-4xl md:text-5xl">
+            Editorial-quality reports
+          </h2>
+          <p className="mt-4 font-mono text-xs uppercase tracking-wider text-[#1A1817]/40">
+            Insights delivered to your inbox, beautifully designed
+          </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:gap-8">
           {reports.map((report, idx) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: idx * 0.15, duration: 0.5 }}
-              whileHover={{ y: -8 }}
-              className="rounded-2xl border border-[#1A1817]/10 bg-white/40 p-6 backdrop-blur-sm transition-all sm:p-8 lg:rounded-3xl"
-              style={{ borderColor: isInView ? report.color : undefined }}
+              transition={{ delay: idx * 0.15, duration: 0.7 }}
+              whileHover={{ y: -6 }}
+              className="group rounded-2xl border border-[#1A1817]/8 bg-white/50 p-8 backdrop-blur-sm transition-all"
             >
-              <div className="mb-4 text-5xl sm:mb-6 sm:text-6xl">{report.image}</div>
-              <h3 className="font-serif text-xl font-light text-[#1A1817] sm:text-2xl">{report.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#1A1817]/60 sm:mt-3">{report.description}</p>
-              <div className="mt-4 flex items-center gap-2 sm:mt-6">
+              <div className="mb-6 text-5xl">{report.icon}</div>
+              <h3 className="font-serif text-2xl font-light text-[#1A1817]">{report.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-[#1A1817]/60">{report.description}</p>
+              <div className="mt-6 flex items-center gap-2">
                 <div className="h-0.5 w-8 rounded-full" style={{ backgroundColor: report.color }} />
-                <span className="font-mono text-xs uppercase tracking-wider text-[#1A1817]/40">Included Free</span>
+                <span className="font-mono text-xs uppercase tracking-wider text-[#1A1817]/30">Included Free</span>
               </div>
             </motion.div>
           ))}
@@ -637,68 +647,46 @@ function ReportsShowcaseSection() {
   );
 }
 
-// Outcomes Section
-function OutcomesSection() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-
-  const outcomes = [
-    { value: "2.5x", label: "More Focus Time", icon: "🎯" },
-    { value: "-68%", label: "Digital Clutter", icon: "🧘" },
-    { value: "+40%", label: "Task Completion", icon: "✅" },
-  ];
-
+// Global Presence with World Map
+function GlobalPresenceSection() {
   return (
-    <section className="py-16 px-4 sm:py-20 lg:py-24 lg:px-8 border-t border-[#1A1817]/5">
-      <div className="mx-auto max-w-7xl">
-        <motion.div initial={{ opacity: 0 }} animate={isInView ? { opacity: 1 } : {}} className="text-center">
-          <h2 className="font-serif text-3xl font-light italic text-[#1A1817] sm:text-4xl md:text-5xl">Measurable calm</h2>
-          <p className="mt-3 font-mono text-xs uppercase tracking-wider text-[#1A1817]/60 sm:mt-4">Real outcomes from our community.</p>
+    <section className="py-20 px-4 sm:py-28 lg:py-32 lg:px-8">
+      <div className="mx-auto max-w-7xl text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <p className="font-serif text-3xl font-light italic text-[#1A1817] md:text-5xl">
+            Access your life{" "}
+            <span className="text-[#C2786B]">
+              {"anywhere".split("").map((char, idx) => (
+                <motion.span
+                  key={idx}
+                  className="inline-block"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: idx * 0.03 }}
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </span>
+          </p>
+          <p className="mt-4 text-sm text-[#1A1817]/60 md:text-base max-w-2xl mx-auto">
+            Your dashboard syncs seamlessly across devices. At home, at work, or anywhere 
+            in between — your digital sanctuary is always with you.
+          </p>
         </motion.div>
-
-        <div className="mt-12 grid grid-cols-1 gap-8 sm:mt-16 md:grid-cols-3">
-          {outcomes.map((item, idx) => (
-            <motion.div key={idx} initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: idx * 0.15 }} className="text-center">
-              <div className="mb-4 text-4xl sm:mb-6 sm:text-5xl">{item.icon}</div>
-              <div className="font-serif text-5xl font-light text-[#C2786B] sm:text-6xl">{item.value}</div>
-              <p className="mt-2 font-mono text-xs uppercase tracking-wider text-[#1A1817]/60">{item.label}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// How It Works Section
-function HowItWorksSection() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-
-  const steps = [
-    { step: "01", title: "Sign Up", desc: "Create your free account in seconds." },
-    { step: "02", title: "Connect", desc: "Link your calendar and favorite tools." },
-    { step: "03", title: "Customize", desc: "Arrange widgets to fit your flow." },
-    { step: "04", title: "Breathe", desc: "Enjoy a calmer, more focused day." },
-  ];
-
-  return (
-    <section className="py-16 px-4 sm:py-20 lg:py-24 lg:px-8 bg-[#1A1817]/[0.02]">
-      <div className="mx-auto max-w-7xl">
-        <motion.div initial={{ opacity: 0 }} animate={isInView ? { opacity: 1 } : {}} className="text-center">
-          <h2 className="font-serif text-3xl font-light italic text-[#1A1817] sm:text-4xl md:text-5xl">How it works</h2>
-        </motion.div>
-
-        <div className="mt-12 grid grid-cols-1 gap-6 sm:mt-16 sm:gap-8 md:grid-cols-4">
-          {steps.map((item, idx) => (
-            <motion.div key={idx} initial={{ opacity: 0, x: -20 }} animate={isInView ? { opacity: 1, x: 0 } : {}} transition={{ delay: idx * 0.1 }} className="relative">
-              <div className="mb-3 font-mono text-2xl text-[#C2786B]/40 sm:mb-4">{item.step}</div>
-              <h3 className="font-serif text-lg font-light sm:text-xl">{item.title}</h3>
-              <p className="mt-2 text-sm text-[#1A1817]/60">{item.desc}</p>
-              {idx < 3 && <div className="absolute -right-4 top-6 hidden h-0.5 w-6 bg-[#1A1817]/10 md:block" />}
-            </motion.div>
-          ))}
-        </div>
+        <WorldMap
+          dots={[
+            { start: { lat: 40.7128, lng: -74.006 }, end: { lat: 51.5074, lng: -0.1278 } },
+            { start: { lat: 35.6762, lng: 139.6503 }, end: { lat: 37.7749, lng: -122.4194 } },
+            { start: { lat: -33.8688, lng: 151.2093 }, end: { lat: 19.076, lng: 72.8777 } },
+            { start: { lat: 55.7558, lng: 37.6173 }, end: { lat: -23.5505, lng: -46.6333 } },
+            { start: { lat: 34.0522, lng: -118.2437 }, end: { lat: 41.9028, lng: 12.4964 } },
+          ]}
+        />
       </div>
     </section>
   );
@@ -710,23 +698,50 @@ function TestimonialsSection() {
   const isInView = useInView(ref, { once: true });
 
   const testimonials = [
-    { quote: "Plaintheory has replaced five different apps for me. It's my digital sanctuary.", author: "Sarah Chen", role: "Design Lead" },
-    { quote: "Finally, a dashboard that respects my attention. The weekly reports are a game changer.", author: "Marcus Webb", role: "Software Engineer" },
-    { quote: "I start every morning with Plaintheory. The annual review helped me see my growth clearly.", author: "Elena Rossi", role: "Writer" },
+    { 
+      quote: "Plaintheory replaced five different apps for me. It's the first thing I open each morning — a moment of calm before the day begins.", 
+      author: "Sarah Chen", 
+      role: "Design Lead" 
+    },
+    { 
+      quote: "Finally, a dashboard that respects my attention. No notifications, no infinite scroll — just what I need, when I need it.", 
+      author: "Marcus Webb", 
+      role: "Software Engineer" 
+    },
+    { 
+      quote: "The weekly reports are a game changer. They help me reflect without the usual productivity guilt. Just gentle, useful insights.", 
+      author: "Elena Rossi", 
+      role: "Writer" 
+    },
   ];
 
   return (
-    <section className="py-16 px-4 sm:py-20 lg:py-24 lg:px-8 border-t border-[#1A1817]/5">
+    <section className="py-20 px-4 sm:py-28 lg:py-32 lg:px-8 border-t border-[#1A1817]/5">
       <div className="mx-auto max-w-7xl">
-        <motion.div initial={{ opacity: 0 }} animate={isInView ? { opacity: 1 } : {}} className="text-center">
-          <h2 className="font-serif text-3xl font-light italic text-[#1A1817] sm:text-4xl md:text-5xl">Loved by mindful creators</h2>
+        <motion.div 
+          initial={{ opacity: 0 }} 
+          animate={isInView ? { opacity: 1 } : {}} 
+          className="text-center mb-16"
+        >
+          <h2 className="font-serif text-3xl font-light italic text-[#1A1817] sm:text-4xl md:text-5xl">
+            Trusted by mindful people
+          </h2>
         </motion.div>
 
-        <div className="mt-12 grid grid-cols-1 gap-6 sm:mt-16 sm:gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:gap-8">
           {testimonials.map((t, idx) => (
-            <motion.div key={idx} initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: idx * 0.1 }} className="rounded-2xl border border-[#1A1817]/10 bg-white/40 p-6 backdrop-blur-sm sm:p-8">
-              <p className="font-serif text-base italic text-[#1A1817]/80 sm:text-lg">"{t.quote}"</p>
-              <div className="mt-4 sm:mt-6"><p className="font-medium">{t.author}</p><p className="text-sm text-[#1A1817]/40">{t.role}</p></div>
+            <motion.div 
+              key={idx} 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={isInView ? { opacity: 1, y: 0 } : {}} 
+              transition={{ delay: idx * 0.1 }} 
+              className="rounded-2xl border border-[#1A1817]/8 bg-white/40 p-8 backdrop-blur-sm"
+            >
+              <p className="font-serif text-base italic text-[#1A1817]/70">"{t.quote}"</p>
+              <div className="mt-6">
+                <p className="font-medium text-[#1A1817]">{t.author}</p>
+                <p className="text-sm text-[#1A1817]/40">{t.role}</p>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -735,34 +750,71 @@ function TestimonialsSection() {
   );
 }
 
-// Pricing Section
+// Pricing Section - Free Forever
 function PricingSection({ email, setEmail, submitted, handleSubmit }: any) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
 
   return (
-    <section id="pricing" ref={ref} className="py-16 px-4 sm:py-20 lg:py-24 lg:px-8">
+    <section id="pricing" ref={ref} className="py-20 px-4 sm:py-28 lg:py-32 lg:px-8 bg-gradient-to-b from-transparent to-[#C2786B]/[0.03]">
       <div className="mx-auto max-w-4xl">
-        <motion.div initial={{ opacity: 0 }} animate={isInView ? { opacity: 1 } : {}} className="text-center">
-          <h2 className="font-serif text-3xl font-light italic text-[#1A1817] sm:text-4xl md:text-5xl">Free, forever</h2>
-          <p className="mt-3 text-base text-[#1A1817]/60 sm:mt-4 sm:text-lg">No credit card required. Get started in seconds.</p>
+        <motion.div 
+          initial={{ opacity: 0 }} 
+          animate={isInView ? { opacity: 1 } : {}} 
+          className="text-center"
+        >
+          <h2 className="font-serif text-3xl font-light italic text-[#1A1817] sm:text-4xl md:text-5xl">
+            Free, forever
+          </h2>
+          <p className="mt-4 text-base text-[#1A1817]/60">
+            No credit card required. No hidden fees. Just a calmer digital life.
+          </p>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.2 }} className="mt-10 rounded-2xl border border-[#C2786B]/20 bg-white/60 p-6 backdrop-blur-sm sm:mt-12 sm:p-8 md:p-12 lg:rounded-3xl">
-          <div className="text-center"><div className="font-mono text-5xl font-light text-[#1A1817] sm:text-6xl">$0</div><p className="mt-2 text-sm uppercase tracking-wider text-[#1A1817]/40">Always free core features</p></div>
-          <ul className="mt-6 space-y-2 sm:mt-8 sm:space-y-3">
-            {["All core features", "Weekly, quarterly & annual reports", "Unlimited widgets", "Email support"].map((item, i) => (
-              <li key={i} className="flex items-center justify-center gap-2 text-[#1A1817]/70"><span className="text-[#C2786B]">✓</span> {item}</li>
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }} 
+          animate={isInView ? { opacity: 1, y: 0 } : {}} 
+          transition={{ delay: 0.2 }} 
+          className="mt-12 rounded-3xl border border-[#C2786B]/15 bg-white/60 p-8 backdrop-blur-sm md:p-12"
+        >
+          <div className="text-center">
+            <div className="font-serif text-6xl font-light text-[#1A1817]">$0</div>
+            <p className="mt-2 text-sm uppercase tracking-wider text-[#1A1817]/40">Always free</p>
+          </div>
+          <ul className="mt-8 space-y-3">
+            {[
+              "Unified dashboard with all core features",
+              "Weekly, quarterly & annual reports",
+              "Unlimited widgets and customization",
+              "Local-first data storage",
+              "Optional encrypted sync",
+              "Email support"
+            ].map((item, i) => (
+              <li key={i} className="flex items-center justify-center gap-2 text-[#1A1817]/70">
+                <span className="text-[#C2786B]">✓</span> {item}
+              </li>
             ))}
           </ul>
-          <div className="mt-8 sm:mt-10">
+          <div className="mt-10">
             {!submitted ? (
               <form onSubmit={handleSubmit} className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row sm:gap-4">
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your email" required className="flex-1 rounded-full border border-[#1A1817]/10 bg-white/80 px-5 py-3 text-sm focus:border-[#C2786B] focus:outline-none sm:py-4" />
-                <button type="submit" className="rounded-full bg-[#1A1817] px-6 py-3 font-mono text-sm font-medium text-white transition-all hover:bg-[#C2786B] sm:py-4">Start Free</button>
+                <input 
+                  type="email" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  placeholder="Your email" 
+                  required 
+                  className="flex-1 rounded-full border border-[#1A1817]/10 bg-white/80 px-5 py-3.5 text-sm focus:border-[#C2786B] focus:outline-none" 
+                />
+                <button 
+                  type="submit" 
+                  className="rounded-full bg-[#1A1817] px-6 py-3.5 font-mono text-sm font-medium text-white transition-all hover:bg-[#C2786B]"
+                >
+                  Start Free
+                </button>
               </form>
             ) : (
-              <div className="text-center text-[#C2786B] font-mono">✓ Check your inbox!</div>
+              <div className="text-center font-mono text-[#C2786B]">✓ Check your inbox!</div>
             )}
           </div>
         </motion.div>
@@ -774,21 +826,30 @@ function PricingSection({ email, setEmail, submitted, handleSubmit }: any) {
 // FAQ Section
 function FAQSection() {
   const faqs = [
-    { q: "Is Plaintheory really free?", a: "Yes, the core product is free forever." },
-    { q: "Where is my data stored?", a: "Locally first, with optional encrypted cloud sync." },
-    { q: "What are the reports like?", a: "Beautifully designed PDF summaries delivered weekly, quarterly, and annually." },
-    { q: "Can I export my data?", a: "Absolutely. Export everything to CSV or JSON anytime." },
+    { q: "Is Plaintheory really free forever?", a: "Yes. The core product is and always will be free. We believe a calmer digital life shouldn't cost anything." },
+    { q: "Where is my data stored?", a: "Locally on your device by default. You can optionally enable encrypted cloud sync for backup across devices." },
+    { q: "What makes Plaintheory different?", a: "We're built on three principles: unified (everything in one place), intentional (no engagement traps), and owned (your data stays yours)." },
+    { q: "Can I export my data?", a: "Absolutely. Export everything to CSV or JSON anytime. No lock-in, ever." },
   ];
 
   return (
-    <section className="py-16 px-4 sm:py-20 lg:py-24 lg:px-8 border-t border-[#1A1817]/5">
+    <section className="py-20 px-4 sm:py-28 lg:py-32 lg:px-8 border-t border-[#1A1817]/5">
       <div className="mx-auto max-w-4xl">
-        <h2 className="text-center font-serif text-3xl font-light italic text-[#1A1817] sm:text-4xl md:text-5xl">Questions?</h2>
-        <div className="mt-10 grid gap-4 sm:mt-16 sm:gap-6 md:grid-cols-2">
+        <h2 className="text-center font-serif text-3xl font-light italic text-[#1A1817] sm:text-4xl md:text-5xl">
+          Questions?
+        </h2>
+        <div className="mt-12 grid gap-4 md:grid-cols-2 md:gap-6">
           {faqs.map((faq, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="rounded-xl border border-[#1A1817]/10 bg-white/40 p-5 backdrop-blur-sm sm:p-6">
-              <h3 className="font-serif text-base font-medium sm:text-lg">{faq.q}</h3>
-              <p className="mt-2 text-sm text-[#1A1817]/60">{faq.a}</p>
+            <motion.div 
+              key={i} 
+              initial={{ opacity: 0, y: 20 }} 
+              whileInView={{ opacity: 1, y: 0 }} 
+              viewport={{ once: true }} 
+              transition={{ delay: i * 0.1 }} 
+              className="rounded-xl border border-[#1A1817]/8 bg-white/40 p-6 backdrop-blur-sm"
+            >
+              <h3 className="font-serif text-base font-medium">{faq.q}</h3>
+              <p className="mt-3 text-sm text-[#1A1817]/60 leading-relaxed">{faq.a}</p>
             </motion.div>
           ))}
         </div>
@@ -800,20 +861,39 @@ function FAQSection() {
 // CTA Section
 function CTASection({ email, setEmail, submitted, handleSubmit }: any) {
   return (
-    <section className="py-16 px-4 sm:py-20 lg:py-24 lg:px-8 bg-gradient-to-b from-transparent to-[#C2786B]/5">
+    <section className="py-20 px-4 sm:py-28 lg:py-32 lg:px-8">
       <div className="mx-auto max-w-4xl text-center">
-        <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="font-serif text-3xl font-light text-[#1A1817] sm:text-4xl md:text-5xl lg:text-6xl">
-          Ready to find your rhythm?
+        <motion.h2 
+          initial={{ opacity: 0, y: 20 }} 
+          whileInView={{ opacity: 1, y: 0 }} 
+          viewport={{ once: true }} 
+          className="font-serif text-3xl font-light text-[#1A1817] sm:text-4xl md:text-5xl lg:text-6xl"
+        >
+          Find your calm
         </motion.h2>
-        <p className="mt-4 text-base text-[#1A1817]/60 sm:mt-6 sm:text-lg">Join thousands who have found calm with Plaintheory.</p>
-        <div className="mt-8 sm:mt-10">
+        <p className="mt-4 text-base text-[#1A1817]/60">
+          Join people who have found clarity with Plaintheory.
+        </p>
+        <div className="mt-8">
           {!submitted ? (
             <form onSubmit={handleSubmit} className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row sm:gap-4">
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" required className="flex-1 rounded-full border border-[#1A1817]/20 bg-white/80 px-5 py-3 text-sm focus:border-[#C2786B] focus:outline-none sm:py-4" />
-              <button type="submit" className="rounded-full bg-[#C2786B] px-6 py-3 font-mono text-sm font-medium text-white transition-all hover:bg-[#A8665A] sm:py-4 sm:px-8">Get Started</button>
+              <input 
+                type="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                placeholder="Enter your email" 
+                required 
+                className="flex-1 rounded-full border border-[#1A1817]/10 bg-white/80 px-5 py-3.5 text-sm focus:border-[#C2786B] focus:outline-none" 
+              />
+              <button 
+                type="submit" 
+                className="rounded-full bg-[#C2786B] px-6 py-3.5 font-mono text-sm font-medium text-white transition-all hover:bg-[#A8665A]"
+              >
+                Get Started
+              </button>
             </form>
           ) : (
-            <div className="text-[#C2786B] font-mono">Thanks! Check your inbox.</div>
+            <div className="font-mono text-[#C2786B]">Thanks! Check your inbox.</div>
           )}
         </div>
       </div>
@@ -821,24 +901,53 @@ function CTASection({ email, setEmail, submitted, handleSubmit }: any) {
   );
 }
 
-// Footer
+// Footer with LIFE branding
 function Footer() {
   return (
-    <footer className="border-t border-[#1A1817]/10 py-10 px-4 sm:py-12 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-lg font-light tracking-tight text-[#1A1817]">plaintheory</span>
-            <span className="rounded-full bg-[#1A1817]/5 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-[#1A1817]/50">LifeOS</span>
-          </div>
-          <div className="flex flex-wrap justify-center gap-6">
-            {["Twitter", "Github", "Privacy", "Terms", "Contact"].map((item) => (
-              <a key={item} href="#" className="font-mono text-xs uppercase tracking-wider text-[#1A1817]/40 transition-colors hover:text-[#1A1817]">{item}</a>
+    <footer className="border-t border-[#1A1817]/8 pt-16">
+      <div className="px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-lg font-light tracking-tight text-[#1A1817]">plaintheory</span>
+                <span className="rounded-full bg-[#C2786B]/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-[#C2786B]">
+                  LifeOS
+                </span>
+              </div>
+              <p className="mt-4 text-sm text-[#1A1817]/50 max-w-xs">
+                A calm, intentional dashboard for your digital life. Free forever.
+              </p>
+            </div>
+            
+            {[
+              { title: "Product", links: ["Philosophy", "Features", "Reports", "Pricing"] },
+              { title: "Company", links: ["About", "Blog", "Privacy", "Contact"] },
+              { title: "Resources", links: ["Help Center", "Community", "API Status", "Changelog"] },
+            ].map((col, i) => (
+              <div key={i}>
+                <h4 className="font-mono text-xs uppercase tracking-wider text-[#1A1817]/30">{col.title}</h4>
+                <ul className="mt-4 space-y-2">
+                  {col.links.map((link) => (
+                    <li key={link}>
+                      <a href="#" className="text-sm text-[#1A1817]/50 hover:text-[#1A1817] transition-colors">
+                        {link}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </div>
-        </div>
-        <div className="mt-6 text-center sm:mt-8">
-          <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#1A1817]/20">© {new Date().getFullYear()} PLAINTHEORY. CRAFTED WITH INTENTION.</p>
+          
+          <div className="mt-20 pb-8 text-center">
+            <div className="select-none font-serif text-[12vw] font-light tracking-tighter text-[#1A1817]/[0.03] leading-none md:text-[10vw]">
+              CALM
+            </div>
+            <p className="mt-4 text-[10px] font-medium uppercase tracking-[0.2em] text-[#1A1817]/20">
+              © {new Date().getFullYear()} PLAINTHEORY. CRAFTED WITH INTENTION.
+            </p>
+          </div>
         </div>
       </div>
     </footer>
